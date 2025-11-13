@@ -135,7 +135,7 @@ func main() {
 	profileUpdateHandler := eventhandlers.NewProfileUpdatedHandler(userRepository)
 
 	// Initialize controllers
-	userController := controllers.NewUserController(userCommandService, userQueryService)
+	userController := controllers.NewUserController(userCommandService, userQueryService, roleRepository)
 
 	// Initialize JWT middleware
 	jwtMiddleware := middleware.NewJWTMiddleware(jwtSecret)

@@ -15,32 +15,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/health": {
-            "get": {
-                "description": "Get health status of the service",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "health"
-                ],
-                "summary": "Health check",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/users/username/{username}": {
             "get": {
                 "security": [
@@ -285,9 +259,9 @@ const docTemplate = `{
                     "type": "string",
                     "example": "https://example.com/profile.jpg"
                 },
-                "roleId": {
+                "role": {
                     "type": "string",
-                    "example": "550e8400-e29b-41d4-a716-446655440001"
+                    "example": "user"
                 },
                 "updatedAt": {
                     "type": "string",
