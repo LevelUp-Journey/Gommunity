@@ -1,0 +1,201 @@
+basePath: /
+definitions:
+  resources.ErrorResponse:
+    properties:
+      error:
+        example: Invalid request
+        type: string
+    type: object
+  resources.UpdateBannerURLResource:
+    properties:
+      bannerUrl:
+        example: https://example.com/banner.jpg
+        type: string
+    required:
+    - bannerUrl
+    type: object
+  resources.UserResource:
+    properties:
+      bannerUrl:
+        example: https://example.com/banner.jpg
+        type: string
+      createdAt:
+        example: "2025-11-13T17:02:46Z"
+        type: string
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      profileId:
+        example: a751deae-573e-42e3-851c-04b242d6536d
+        type: string
+      profileUrl:
+        example: https://example.com/profile.jpg
+        type: string
+      updatedAt:
+        example: "2025-11-13T17:02:46Z"
+        type: string
+      userId:
+        example: 32f05fbf-9793-4205-980e-d23716627750
+        type: string
+      username:
+        example: mateoo
+        type: string
+    type: object
+host: localhost
+info:
+  contact: {}
+  description: Community management API with Kafka event processing
+  title: Gommunity API
+  version: "1.0"
+paths:
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Get health status of the service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health check
+      tags:
+      - health
+  /users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a specific user by their user ID
+      parameters:
+      - description: User ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resources.UserResource'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user by ID
+      tags:
+      - users
+  /users/{id}/banner:
+    put:
+      consumes:
+      - application/json
+      description: Update the banner URL for the authenticated user
+      parameters:
+      - description: User ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Banner URL update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/resources.UpdateBannerURLResource'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resources.UserResource'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resources.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update user banner URL
+      tags:
+      - users
+  /users/username/{username}:
+    get:
+      consumes:
+      - application/json
+      description: Get a specific user by their username
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resources.UserResource'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user by username
+      tags:
+      - users
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
