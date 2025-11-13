@@ -285,6 +285,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "https://example.com/profile.jpg"
                 },
+                "roleId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440001"
+                },
                 "updatedAt": {
                     "type": "string",
                     "example": "2025-11-13T17:02:46Z"
@@ -295,7 +299,7 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string",
-                    "example": "mateoo"
+                    "example": "johndoe"
                 }
             }
         }

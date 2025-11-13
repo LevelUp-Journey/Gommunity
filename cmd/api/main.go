@@ -55,7 +55,7 @@ func main() {
 	mongoTimeout := getEnvDuration("MONGO_TIMEOUT", 10*time.Second)
 	kafkaBootstrapServers := getEnv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
 	jwtSecret := getEnv("JWT_SECRET", "")
-	serviceDiscoveryURL := getEnv("SERVICE_DISCOVERY_URL", "http://127.0.0.1:8761/eureka/")
+	serviceDiscoveryURL := strings.TrimSuffix(getEnv("SERVICE_DISCOVERY_URL", "http://127.0.0.1:8761/eureka"), "/")
 	serverIP := getEnv("SERVER_IP", "127.0.0.1")
 	serviceName := getEnv("SERVICE_NAME", "gommunity-service")
 
@@ -105,7 +105,7 @@ func main() {
 		ServerIP:        serverIP,
 		Port:            port,
 		DiscoveryURL:    serviceDiscoveryURL,
-		HealthCheckURL:  fmt.Sprintf("http://%s:%s/health", serverIP, port),
+		HealthCheckURL:  fmt.Sprintf("http://%s:%s/", serverIP, port),
 		StatusPageURL:   fmt.Sprintf("http://%s:%s/swagger/index.html", serverIP, port),
 		HomePageURL:     fmt.Sprintf("http://%s:%s/", serverIP, port),
 		RenewalInterval: 30 * time.Second,
@@ -181,7 +181,6 @@ func main() {
 		c.Redirect(302, "/swagger/index.html")
 	})
 
-	r.GET("/health", healthHandler)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// User routes (protected with JWT)
@@ -221,21 +220,6 @@ func main() {
 	cancel()
 
 	log.Println("Server exited")
-}
-
-// healthHandler godoc
-// @Summary Health check
-// @Description Get health status of the service
-// @Tags health
-// @Accept json
-// @Produce json
-// @Success 200 {object} map[string]string
-// @Router /health [get]
-func healthHandler(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"status":  "healthy",
-		"service": "gommunity",
-	})
 }
 
 // seedRoles seeds the default roles if they don't exist
