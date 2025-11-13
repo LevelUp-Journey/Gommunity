@@ -7,7 +7,8 @@ type UserResource struct {
 	ID         string    `json:"id" example:"550e8400-e29b-41d4-a716-446655440000"`
 	UserID     string    `json:"userId" example:"32f05fbf-9793-4205-980e-d23716627750"`
 	ProfileID  string    `json:"profileId" example:"a751deae-573e-42e3-851c-04b242d6536d"`
-	Username   string    `json:"username" example:"mateoo"`
+	Username   string    `json:"username" example:"johndoe"`
+	RoleID     string    `json:"roleId" example:"550e8400-e29b-41d4-a716-446655440001"`
 	ProfileURL *string   `json:"profileUrl,omitempty" example:"https://example.com/profile.jpg"`
 	BannerURL  *string   `json:"bannerUrl,omitempty" example:"https://example.com/banner.jpg"`
 	UpdatedAt  time.Time `json:"updatedAt" example:"2025-11-13T17:02:46Z"`

@@ -223,6 +223,7 @@ func (c *UserController) transformUserToResource(user *entities.User) resources.
 		UserID:     user.UserID().Value(),
 		ProfileID:  user.ProfileID().Value(),
 		Username:   user.Username().Value(),
+		RoleID:     user.RoleID().Value(),
 		ProfileURL: user.ProfileURL(),
 		BannerURL:  user.BannerURL(),
 		UpdatedAt:  user.UpdatedAt(),

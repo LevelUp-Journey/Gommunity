@@ -37,3 +37,21 @@ func (s *userCommandServiceImpl) HandleUpdateBanner(ctx context.Context, cmd com
 	// Save updated user
 	return s.userRepository.Update(ctx, user)
 }
+
+func (s *userCommandServiceImpl) HandleUpdateRole(ctx context.Context, cmd commands.UpdateRoleCommand) error {
+	// Find user
+	user, err := s.userRepository.FindByUserID(ctx, cmd.UserID())
+	if err != nil {
+		return err
+	}
+
+	if user == nil {
+		return errors.New("user not found")
+	}
+
+	// Update role
+	user.UpdateRoleID(cmd.RoleID())
+
+	// Save updated user
+	return s.userRepository.Update(ctx, user)
+}

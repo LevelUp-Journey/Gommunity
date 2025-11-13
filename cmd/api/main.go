@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -13,9 +14,13 @@ import (
 	"Gommunity/internal/community/users/application/commandservices"
 	"Gommunity/internal/community/users/application/eventhandlers"
 	"Gommunity/internal/community/users/application/queryservices"
+	"Gommunity/internal/community/users/domain/model/entities"
+	"Gommunity/internal/community/users/domain/model/valueobjects"
+	domain_repos "Gommunity/internal/community/users/domain/repositories"
 	"Gommunity/internal/community/users/infrastructure/messaging"
 	"Gommunity/internal/community/users/infrastructure/persistence/repositories"
 	"Gommunity/internal/community/users/interfaces/rest/controllers"
+	"Gommunity/shared/infrastructure/discovery"
 	"Gommunity/shared/infrastructure/messaging/kafka"
 	"Gommunity/shared/infrastructure/middleware"
 	"Gommunity/shared/infrastructure/persistence/mongodb"
@@ -50,6 +55,9 @@ func main() {
 	mongoTimeout := getEnvDuration("MONGO_TIMEOUT", 10*time.Second)
 	kafkaBootstrapServers := getEnv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
 	jwtSecret := getEnv("JWT_SECRET", "")
+	serviceDiscoveryURL := getEnv("SERVICE_DISCOVERY_URL", "http://127.0.0.1:8761/eureka/")
+	serverIP := getEnv("SERVER_IP", "127.0.0.1")
+	serviceName := getEnv("SERVICE_NAME", "gommunity-service")
 
 	// Set Swagger host dynamically
 	docs.SwaggerInfo.Host = "localhost:" + port
@@ -73,6 +81,7 @@ func main() {
 
 	// Initialize repositories
 	userCollection := mongoConn.GetCollection("users")
+	roleCollection := mongoConn.GetCollection("roles")
 
 	// Create indexes
 	indexCtx, indexCancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -82,6 +91,40 @@ func main() {
 	}
 
 	userRepository := repositories.NewUserRepository(userCollection)
+	roleRepository := repositories.NewRoleRepository(roleCollection)
+
+	// Seed roles
+	if err := seedRoles(context.Background(), roleRepository); err != nil {
+		log.Printf("Warning: Failed to seed roles: %v", err)
+	}
+
+	// Initialize Eureka client
+	var eurekaClient *discovery.EurekaClient
+	eurekaClient, err = discovery.NewEurekaClient(discovery.EurekaConfig{
+		ServiceName:     serviceName,
+		ServerIP:        serverIP,
+		Port:            port,
+		DiscoveryURL:    serviceDiscoveryURL,
+		HealthCheckURL:  fmt.Sprintf("http://%s:%s/health", serverIP, port),
+		StatusPageURL:   fmt.Sprintf("http://%s:%s/swagger/index.html", serverIP, port),
+		HomePageURL:     fmt.Sprintf("http://%s:%s/", serverIP, port),
+		RenewalInterval: 30 * time.Second,
+		DurationInSecs:  90,
+	})
+	if err != nil {
+		log.Printf("Warning: Failed to create Eureka client: %v", err)
+		eurekaClient = nil
+	} else {
+		// Register with Eureka
+		if err := eurekaClient.Register(); err != nil {
+			log.Printf("Warning: Failed to register with Eureka: %v", err)
+			eurekaClient = nil
+		} else {
+			// Start heartbeat
+			eurekaClient.StartHeartbeat()
+			log.Println("Successfully registered with Eureka and started heartbeat")
+		}
+	}
 
 	// Initialize services
 	userQueryService := queryservices.NewUserQueryService(userRepository)
@@ -138,6 +181,7 @@ func main() {
 		c.Redirect(302, "/swagger/index.html")
 	})
 
+	r.GET("/health", healthHandler)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// User routes (protected with JWT)
@@ -166,10 +210,74 @@ func main() {
 	<-quit
 	log.Println("Shutting down server...")
 
+	// Deregister from Eureka
+	if eurekaClient != nil {
+		if err := eurekaClient.Deregister(); err != nil {
+			log.Printf("Error deregistering from Eureka: %v", err)
+		}
+	}
+
 	// Cancel Kafka consumer context
 	cancel()
 
 	log.Println("Server exited")
+}
+
+// healthHandler godoc
+// @Summary Health check
+// @Description Get health status of the service
+// @Tags health
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Router /health [get]
+func healthHandler(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"status":  "healthy",
+		"service": "gommunity",
+	})
+}
+
+// seedRoles seeds the default roles if they don't exist
+func seedRoles(ctx context.Context, roleRepo domain_repos.RoleRepository) error {
+	roles := []struct {
+		id   string
+		name string
+	}{
+		{valueobjects.UserRoleIDStr, "user"},
+		{valueobjects.MemberRoleIDStr, "member"},
+		{valueobjects.AdminRoleIDStr, "admin"},
+		{valueobjects.OwnerRoleIDStr, "owner"},
+	}
+
+	for _, r := range roles {
+		roleID, err := valueobjects.NewRoleID(r.id)
+		if err != nil {
+			return err
+		}
+
+		// Check if role exists
+		existing, err := roleRepo.FindByID(ctx, roleID)
+		if err != nil {
+			return err
+		}
+
+		if existing == nil {
+			// Create role
+			role, err := entities.NewRole(roleID, r.name)
+			if err != nil {
+				return err
+			}
+
+			if err := roleRepo.Save(ctx, role); err != nil {
+				return err
+			}
+
+			log.Printf("Seeded role: %s", r.name)
+		}
+	}
+
+	return nil
 }
 
 // Helper functions for environment variables

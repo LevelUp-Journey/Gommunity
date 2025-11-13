@@ -30,6 +30,7 @@ type userDocument struct {
 	UserID     string  `bson:"user_id"`
 	ProfileID  string  `bson:"profile_id"`
 	Username   string  `bson:"username"`
+	RoleID     string  `bson:"role_id"`
 	ProfileURL *string `bson:"profile_url"`
 	BannerURL  *string `bson:"banner_url"`
 	UpdatedAt  int64   `bson:"updated_at"`
@@ -60,6 +61,7 @@ func (r *userRepositoryImpl) Update(ctx context.Context, user *entities.User) er
 	update := bson.M{
 		"$set": bson.M{
 			"username":    user.Username().Value(),
+			"role_id":     user.RoleID().Value(),
 			"profile_url": user.ProfileURL(),
 			"banner_url":  user.BannerURL(),
 			"updated_at":  user.UpdatedAt().Unix(),
@@ -170,6 +172,7 @@ func (r *userRepositoryImpl) entityToDocument(user *entities.User) *userDocument
 		UserID:     user.UserID().Value(),
 		ProfileID:  user.ProfileID().Value(),
 		Username:   user.Username().Value(),
+		RoleID:     user.RoleID().Value(),
 		ProfileURL: user.ProfileURL(),
 		BannerURL:  user.BannerURL(),
 		UpdatedAt:  user.UpdatedAt().Unix(),
@@ -197,6 +200,14 @@ func (r *userRepositoryImpl) documentToEntity(doc *userDocument) (*entities.User
 	if err != nil {
 		return nil, err
 	}
+
+	// Set roleID from document
+	roleID, err := valueobjects.NewRoleID(doc.RoleID)
+	if err != nil {
+		// If roleID is invalid, default to user role
+		roleID, _ = valueobjects.NewRoleID(valueobjects.UserRoleIDStr)
+	}
+	user.UpdateRoleID(roleID)
 
 	return user, nil
 }
