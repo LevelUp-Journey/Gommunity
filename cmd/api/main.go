@@ -138,7 +138,6 @@ func main() {
 		c.Redirect(302, "/swagger/index.html")
 	})
 
-	r.GET("/health", healthHandler)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// User routes (protected with JWT)
@@ -171,21 +170,6 @@ func main() {
 	cancel()
 
 	log.Println("Server exited")
-}
-
-// healthHandler godoc
-// @Summary Health check
-// @Description Get health status of the service
-// @Tags health
-// @Accept json
-// @Produce json
-// @Success 200 {object} map[string]string
-// @Router /health [get]
-func healthHandler(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"status":  "healthy",
-		"service": "gommunity",
-	})
 }
 
 // Helper functions for environment variables
