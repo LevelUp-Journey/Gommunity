@@ -29,8 +29,8 @@ definitions:
       id:
         example: 550e8400-e29b-41d4-a716-446655440000
         type: string
-      isActive:
-        example: true
+      isPrivate:
+        example: false
         type: boolean
       logoUrl:
         example: https://example.com/logo.jpg
@@ -68,6 +68,14 @@ definitions:
         type: string
     required:
     - bannerUrl
+    type: object
+  resources.UpdateCommunityPrivacyResource:
+    properties:
+      isPrivate:
+        example: true
+        type: boolean
+    required:
+    - isPrivate
     type: object
   resources.UserResource:
     properties:
@@ -249,6 +257,55 @@ paths:
       security:
       - BearerAuth: []
       summary: Get community by ID
+      tags:
+      - communities
+  /communities/{id}/privacy:
+    patch:
+      consumes:
+      - application/json
+      description: Update the privacy status of a community (only owner can update)
+      parameters:
+      - description: Community ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Community privacy update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/resources.UpdateCommunityPrivacyResource'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resources.CommunityResource'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update community privacy status
       tags:
       - communities
   /communities/my-communities:

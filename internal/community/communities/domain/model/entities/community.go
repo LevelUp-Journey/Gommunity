@@ -16,7 +16,7 @@ type Community struct {
 	description valueobjects.Description   `bson:"description"`
 	logoURL     *string                    `bson:"logo_url"`
 	bannerURL   *string                    `bson:"banner_url"`
-	isActive    bool                       `bson:"is_active"`
+	isPrivate   bool                       `bson:"is_private"`
 	createdAt   time.Time                  `bson:"created_at"`
 	updatedAt   time.Time                  `bson:"updated_at"`
 }
@@ -43,7 +43,7 @@ func NewCommunity(
 		description: description,
 		logoURL:     nil,
 		bannerURL:   nil,
-		isActive:    true,
+		isPrivate:   false,
 		createdAt:   now,
 		updatedAt:   now,
 	}, nil
@@ -78,8 +78,8 @@ func (c *Community) BannerURL() *string {
 	return c.bannerURL
 }
 
-func (c *Community) IsActive() bool {
-	return c.isActive
+func (c *Community) IsPrivate() bool {
+	return c.isPrivate
 }
 
 func (c *Community) CreatedAt() time.Time {
@@ -107,13 +107,18 @@ func (c *Community) UpdateBannerURL(bannerURL string) {
 	c.updatedAt = time.Now()
 }
 
-func (c *Community) Deactivate() {
-	c.isActive = false
+func (c *Community) MakePrivate() {
+	c.isPrivate = true
 	c.updatedAt = time.Now()
 }
 
-func (c *Community) Activate() {
-	c.isActive = true
+func (c *Community) MakePublic() {
+	c.isPrivate = false
+	c.updatedAt = time.Now()
+}
+
+func (c *Community) UpdatePrivacy(isPrivate bool) {
+	c.isPrivate = isPrivate
 	c.updatedAt = time.Now()
 }
 

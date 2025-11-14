@@ -342,6 +342,111 @@ func (c *CommunityController) DeleteCommunity(ctx *gin.Context) {
 	ctx.Status(http.StatusNoContent)
 }
 
+// UpdateCommunityPrivacy godoc
+// @Summary Update community privacy status
+// @Description Update the privacy status of a community (only owner can update)
+// @Tags communities
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Community ID (UUID)"
+// @Param request body resources.UpdateCommunityPrivacyResource true "Community privacy update request"
+// @Success 200 {object} resources.CommunityResource
+// @Failure 400 {object} resources.ErrorResponse
+// @Failure 401 {object} resources.ErrorResponse
+// @Failure 403 {object} resources.ErrorResponse
+// @Failure 404 {object} resources.ErrorResponse
+// @Failure 500 {object} resources.ErrorResponse
+// @Router /communities/{id}/privacy [patch]
+func (c *CommunityController) UpdateCommunityPrivacy(ctx *gin.Context) {
+	communityIDParam := ctx.Param("id")
+
+	// Get authenticated user ID from context
+	authenticatedUserID, err := middleware.GetUserIDFromContext(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, resources.ErrorResponse{
+			Error: "Authentication required",
+		})
+		return
+	}
+
+	communityID, err := valueobjects.NewCommunityID(communityIDParam)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, resources.ErrorResponse{
+			Error: "Invalid community ID format",
+		})
+		return
+	}
+
+	var req resources.UpdateCommunityPrivacyResource
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, resources.ErrorResponse{
+			Error: "Invalid request body",
+		})
+		return
+	}
+
+	// First, verify the community exists and the user is the owner
+	query, err := queries.NewGetCommunityByIDQuery(communityID)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, resources.ErrorResponse{
+			Error: err.Error(),
+		})
+		return
+	}
+
+	community, err := c.queryService.HandleGetByID(ctx.Request.Context(), query)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, resources.ErrorResponse{
+			Error: "Failed to retrieve community",
+		})
+		return
+	}
+
+	if community == nil {
+		ctx.JSON(http.StatusNotFound, resources.ErrorResponse{
+			Error: "Community not found",
+		})
+		return
+	}
+
+	// Verify the user is the owner
+	if !community.IsOwner(authenticatedUserID) {
+		ctx.JSON(http.StatusForbidden, resources.ErrorResponse{
+			Error: "Only the owner can update community privacy",
+		})
+		return
+	}
+
+	// Create and execute command
+	cmd, err := commands.NewUpdateCommunityPrivacyCommand(communityID, req.IsPrivate)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, resources.ErrorResponse{
+			Error: err.Error(),
+		})
+		return
+	}
+
+	if err := c.commandService.HandleUpdatePrivacy(ctx.Request.Context(), cmd); err != nil {
+		ctx.JSON(http.StatusInternalServerError, resources.ErrorResponse{
+			Error: "Failed to update community privacy",
+		})
+		return
+	}
+
+	// Retrieve updated community
+	updatedCommunity, err := c.queryService.HandleGetByID(ctx.Request.Context(), query)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, resources.ErrorResponse{
+			Error: "Failed to retrieve updated community",
+		})
+		return
+	}
+
+	response := c.transformCommunityToResource(updatedCommunity)
+	ctx.JSON(http.StatusOK, response)
+}
+
 func (c *CommunityController) transformCommunityToResource(community *entities.Community) resources.CommunityResource {
 	return resources.CommunityResource{
 		ID:          community.ID(),
@@ -351,7 +456,7 @@ func (c *CommunityController) transformCommunityToResource(community *entities.C
 		Description: community.Description().Value(),
 		LogoURL:     community.LogoURL(),
 		BannerURL:   community.BannerURL(),
-		IsActive:    community.IsActive(),
+		IsPrivate:   community.IsPrivate(),
 		CreatedAt:   community.CreatedAt(),
 		UpdatedAt:   community.UpdatedAt(),
 	}

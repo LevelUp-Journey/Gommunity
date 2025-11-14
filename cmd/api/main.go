@@ -11,6 +11,10 @@ import (
 	"time"
 
 	"Gommunity/docs"
+	community_commandservices "Gommunity/internal/community/communities/application/commandservices"
+	community_queryservices "Gommunity/internal/community/communities/application/queryservices"
+	community_repositories "Gommunity/internal/community/communities/infrastructure/persistence/repositories"
+	community_controllers "Gommunity/internal/community/communities/interfaces/rest/controllers"
 	"Gommunity/internal/community/users/application/commandservices"
 	"Gommunity/internal/community/users/application/eventhandlers"
 	"Gommunity/internal/community/users/application/queryservices"
@@ -82,6 +86,7 @@ func main() {
 	// Initialize repositories
 	userCollection := mongoConn.GetCollection("users")
 	roleCollection := mongoConn.GetCollection("roles")
+	communityCollection := mongoConn.GetCollection("communities")
 
 	// Create indexes
 	indexCtx, indexCancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -92,6 +97,7 @@ func main() {
 
 	userRepository := repositories.NewUserRepository(userCollection)
 	roleRepository := repositories.NewRoleRepository(roleCollection)
+	communityRepository := community_repositories.NewCommunityRepository(communityCollection)
 
 	// Seed roles
 	if err := seedRoles(context.Background(), roleRepository); err != nil {
@@ -129,6 +135,8 @@ func main() {
 	// Initialize services
 	userQueryService := queryservices.NewUserQueryService(userRepository)
 	userCommandService := commandservices.NewUserCommandService(userRepository)
+	communityQueryService := community_queryservices.NewCommunityQueryService(communityRepository)
+	communityCommandService := community_commandservices.NewCommunityCommandService(communityRepository)
 
 	// Initialize event handlers
 	registrationHandler := eventhandlers.NewUserRegistrationHandler(userRepository)
@@ -136,6 +144,7 @@ func main() {
 
 	// Initialize controllers
 	userController := controllers.NewUserController(userCommandService, userQueryService, roleRepository)
+	communityController := community_controllers.NewCommunityController(communityCommandService, communityQueryService)
 
 	// Initialize JWT middleware
 	jwtMiddleware := middleware.NewJWTMiddleware(jwtSecret)
@@ -190,6 +199,18 @@ func main() {
 		userRoutes.GET("/:id", userController.GetUserByID)
 		userRoutes.GET("/username/:username", userController.GetUserByUsername)
 		userRoutes.PUT("/:id/banner", userController.UpdateBannerURL)
+	}
+
+	// Community routes (protected with JWT)
+	communityRoutes := r.Group("/communities")
+	communityRoutes.Use(jwtMiddleware.AuthMiddleware())
+	{
+		communityRoutes.POST("", communityController.CreateCommunity)
+		communityRoutes.GET("", communityController.GetAllCommunities)
+		communityRoutes.GET("/my-communities", communityController.GetMyCommunitiesAsOwner)
+		communityRoutes.GET("/:id", communityController.GetCommunityByID)
+		communityRoutes.DELETE("/:id", communityController.DeleteCommunity)
+		communityRoutes.PATCH("/:id/privacy", communityController.UpdateCommunityPrivacy)
 	}
 
 	// Setup graceful shutdown

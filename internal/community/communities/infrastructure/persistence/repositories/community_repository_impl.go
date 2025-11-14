@@ -33,7 +33,7 @@ type communityDocument struct {
 	Description string  `bson:"description"`
 	LogoURL     *string `bson:"logo_url"`
 	BannerURL   *string `bson:"banner_url"`
-	IsActive    bool    `bson:"is_active"`
+	IsPrivate   bool    `bson:"is_private"`
 	CreatedAt   int64   `bson:"created_at"`
 	UpdatedAt   int64   `bson:"updated_at"`
 }
@@ -65,7 +65,7 @@ func (r *communityRepositoryImpl) Update(ctx context.Context, community *entitie
 			"description": community.Description().Value(),
 			"logo_url":    community.LogoURL(),
 			"banner_url":  community.BannerURL(),
-			"is_active":   community.IsActive(),
+			"is_private":  community.IsPrivate(),
 			"updated_at":  community.UpdatedAt().Unix(),
 		},
 	}
@@ -213,7 +213,7 @@ func (r *communityRepositoryImpl) entityToDocument(community *entities.Community
 		Description: community.Description().Value(),
 		LogoURL:     community.LogoURL(),
 		BannerURL:   community.BannerURL(),
-		IsActive:    community.IsActive(),
+		IsPrivate:   community.IsPrivate(),
 		CreatedAt:   community.CreatedAt().Unix(),
 		UpdatedAt:   community.UpdatedAt().Unix(),
 	}
@@ -249,8 +249,8 @@ func (r *communityRepositoryImpl) documentToEntity(doc *communityDocument) (*ent
 		community.UpdateBannerURL(*doc.BannerURL)
 	}
 
-	if !doc.IsActive {
-		community.Deactivate()
+	if doc.IsPrivate {
+		community.MakePrivate()
 	}
 
 	return community, nil

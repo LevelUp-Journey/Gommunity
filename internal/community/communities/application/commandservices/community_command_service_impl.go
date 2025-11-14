@@ -84,3 +84,30 @@ func (s *communityCommandServiceImpl) HandleDelete(ctx context.Context, cmd comm
 	log.Printf("Community deleted successfully: %s", cmd.CommunityID().Value())
 	return nil
 }
+
+func (s *communityCommandServiceImpl) HandleUpdatePrivacy(ctx context.Context, cmd commands.UpdateCommunityPrivacyCommand) error {
+	log.Printf("Updating privacy for community: %s", cmd.CommunityID().Value())
+
+	// Find community
+	community, err := s.communityRepo.FindByID(ctx, cmd.CommunityID())
+	if err != nil {
+		log.Printf("Error finding community: %v", err)
+		return err
+	}
+
+	if community == nil {
+		return errors.New("community not found")
+	}
+
+	// Update privacy status
+	community.UpdatePrivacy(cmd.IsPrivate())
+
+	// Save updated community
+	if err := s.communityRepo.Update(ctx, community); err != nil {
+		log.Printf("Error updating community privacy: %v", err)
+		return err
+	}
+
+	log.Printf("Community privacy updated successfully: %s, isPrivate: %v", cmd.CommunityID().Value(), cmd.IsPrivate())
+	return nil
+}

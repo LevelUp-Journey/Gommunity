@@ -11,7 +11,7 @@ type CommunityResource struct {
 	Description string    `json:"description" example:"A community for data science enthusiasts to share knowledge and collaborate"`
 	LogoURL     *string   `json:"logoUrl,omitempty" example:"https://example.com/logo.jpg"`
 	BannerURL   *string   `json:"bannerUrl,omitempty" example:"https://example.com/banner.jpg"`
-	IsActive    bool      `json:"isActive" example:"true"`
+	IsPrivate   bool      `json:"isPrivate" example:"false"`
 	CreatedAt   time.Time `json:"createdAt" example:"2025-11-13T17:02:46Z"`
 	UpdatedAt   time.Time `json:"updatedAt" example:"2025-11-13T17:02:46Z"`
 }
@@ -36,6 +36,11 @@ type UpdateCommunityLogoResource struct {
 // UpdateCommunityBannerResource represents the request to update community banner
 type UpdateCommunityBannerResource struct {
 	BannerURL string `json:"bannerUrl" binding:"required,url" example:"https://example.com/banner.jpg"`
+}
+
+// UpdateCommunityPrivacyResource represents the request to update community privacy status
+type UpdateCommunityPrivacyResource struct {
+	IsPrivate bool `json:"isPrivate" binding:"required" example:"true"`
 }
 
 // ErrorResponse represents an error response

@@ -285,6 +285,82 @@ const docTemplate = `{
                 }
             }
         },
+        "/communities/{id}/privacy": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update the privacy status of a community (only owner can update)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "communities"
+                ],
+                "summary": "Update community privacy status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Community ID (UUID)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Community privacy update request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/resources.UpdateCommunityPrivacyResource"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resources.CommunityResource"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/username/{username}": {
             "get": {
                 "security": [
@@ -526,9 +602,9 @@ const docTemplate = `{
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
-                "isActive": {
+                "isPrivate": {
                     "type": "boolean",
-                    "example": true
+                    "example": false
                 },
                 "logoUrl": {
                     "type": "string",
@@ -578,6 +654,18 @@ const docTemplate = `{
                 "bannerUrl": {
                     "type": "string",
                     "example": "https://example.com/banner.jpg"
+                }
+            }
+        },
+        "resources.UpdateCommunityPrivacyResource": {
+            "type": "object",
+            "required": [
+                "isPrivate"
+            ],
+            "properties": {
+                "isPrivate": {
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
