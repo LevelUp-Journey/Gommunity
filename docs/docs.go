@@ -15,6 +15,276 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/communities": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all communities (paginated)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "communities"
+                ],
+                "summary": "Get all communities",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/resources.CommunityResource"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new community (only for ROLE_TEACHER)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "communities"
+                ],
+                "summary": "Create a new community",
+                "parameters": [
+                    {
+                        "description": "Community creation request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/resources.CreateCommunityResource"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/resources.CommunityResource"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/communities/my-communities": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all communities owned by the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "communities"
+                ],
+                "summary": "Get my communities as owner",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/resources.CommunityResource"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/communities/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get a specific community by its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "communities"
+                ],
+                "summary": "Get community by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Community ID (UUID)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resources.CommunityResource"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete a community (only owner can delete)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "communities"
+                ],
+                "summary": "Delete community",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Community ID (UUID)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/username/{username}": {
             "get": {
                 "security": [
@@ -52,25 +322,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
                         }
                     }
                 }
@@ -113,25 +383,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
                         }
                     }
                 }
@@ -183,31 +453,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
                         }
                     }
                 }
@@ -215,12 +485,87 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "resources.ErrorResponse": {
+        "Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse": {
             "type": "object",
             "properties": {
                 "error": {
                     "type": "string",
                     "example": "Invalid request"
+                }
+            }
+        },
+        "Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Invalid request"
+                }
+            }
+        },
+        "resources.CommunityResource": {
+            "type": "object",
+            "properties": {
+                "bannerUrl": {
+                    "type": "string",
+                    "example": "https://example.com/banner.jpg"
+                },
+                "communityId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440001"
+                },
+                "createdAt": {
+                    "type": "string",
+                    "example": "2025-11-13T17:02:46Z"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "A community for data science enthusiasts to share knowledge and collaborate"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "isActive": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "logoUrl": {
+                    "type": "string",
+                    "example": "https://example.com/logo.jpg"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Data Science Community"
+                },
+                "ownerId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440002"
+                },
+                "updatedAt": {
+                    "type": "string",
+                    "example": "2025-11-13T17:02:46Z"
+                }
+            }
+        },
+        "resources.CreateCommunityResource": {
+            "type": "object",
+            "required": [
+                "description",
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "minLength": 10,
+                    "example": "A community for data science enthusiasts to share knowledge and collaborate"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 3,
+                    "example": "Data Science Community"
                 }
             }
         },

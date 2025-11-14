@@ -119,3 +119,47 @@ func GetProfileIDFromContext(c *gin.Context) (string, error) {
 
 	return profileIDStr, nil
 }
+
+// GetRoleFromContext extracts role from gin context
+func GetRoleFromContext(c *gin.Context) (string, error) {
+	role, exists := c.Get("role")
+	if !exists {
+		return "", errors.New("role not found in context")
+	}
+
+	roleStr, ok := role.(string)
+	if !ok {
+		return "", errors.New("role is not a string")
+	}
+
+	return roleStr, nil
+}
+
+// RequireRole creates middleware that checks if user has required role
+func (jm *JWTMiddleware) RequireRole(requiredRoles ...string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		role, err := GetRoleFromContext(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Role not found in token"})
+			c.Abort()
+			return
+		}
+
+		// Check if user has any of the required roles
+		hasRole := false
+		for _, required := range requiredRoles {
+			if role == required {
+				hasRole = true
+				break
+			}
+		}
+
+		if !hasRole {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Insufficient permissions"})
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}
