@@ -1,12 +1,15 @@
 package controllers
 
 import (
+	"context"
+	"log"
 	"net/http"
 
 	"Gommunity/internal/community/users/domain/model/commands"
 	"Gommunity/internal/community/users/domain/model/entities"
 	"Gommunity/internal/community/users/domain/model/queries"
 	"Gommunity/internal/community/users/domain/model/valueobjects"
+	"Gommunity/internal/community/users/domain/repositories"
 	"Gommunity/internal/community/users/domain/services"
 	"Gommunity/internal/community/users/interfaces/rest/resources"
 	"Gommunity/shared/infrastructure/middleware"
@@ -17,15 +20,18 @@ import (
 type UserController struct {
 	commandService services.UserCommandService
 	queryService   services.UserQueryService
+	roleRepository repositories.RoleRepository
 }
 
 func NewUserController(
 	commandService services.UserCommandService,
 	queryService services.UserQueryService,
+	roleRepository repositories.RoleRepository,
 ) *UserController {
 	return &UserController{
 		commandService: commandService,
 		queryService:   queryService,
+		roleRepository: roleRepository,
 	}
 }
 
@@ -218,12 +224,22 @@ func (c *UserController) UpdateBannerURL(ctx *gin.Context) {
 }
 
 func (c *UserController) transformUserToResource(user *entities.User) resources.UserResource {
+	// Get role name from role repository
+	roleName := "unknown"
+	ctx := context.Background()
+	role, err := c.roleRepository.FindByID(ctx, user.RoleID())
+	if err == nil && role != nil {
+		roleName = role.Name()
+	} else {
+		log.Printf("Warning: Failed to retrieve role name for role ID %s: %v", user.RoleID().Value(), err)
+	}
+
 	return resources.UserResource{
 		ID:         user.ID(),
 		UserID:     user.UserID().Value(),
 		ProfileID:  user.ProfileID().Value(),
 		Username:   user.Username().Value(),
-		RoleID:     user.RoleID().Value(),
+		Role:       roleName,
 		ProfileURL: user.ProfileURL(),
 		BannerURL:  user.BannerURL(),
 		UpdatedAt:  user.UpdatedAt(),

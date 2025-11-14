@@ -11,6 +11,10 @@ import (
 	"time"
 
 	"Gommunity/docs"
+	community_commandservices "Gommunity/internal/community/communities/application/commandservices"
+	community_queryservices "Gommunity/internal/community/communities/application/queryservices"
+	community_repositories "Gommunity/internal/community/communities/infrastructure/persistence/repositories"
+	community_controllers "Gommunity/internal/community/communities/interfaces/rest/controllers"
 	"Gommunity/internal/community/users/application/commandservices"
 	"Gommunity/internal/community/users/application/eventhandlers"
 	"Gommunity/internal/community/users/application/queryservices"
@@ -55,7 +59,7 @@ func main() {
 	mongoTimeout := getEnvDuration("MONGO_TIMEOUT", 10*time.Second)
 	kafkaBootstrapServers := getEnv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
 	jwtSecret := getEnv("JWT_SECRET", "")
-	serviceDiscoveryURL := getEnv("SERVICE_DISCOVERY_URL", "http://127.0.0.1:8761/eureka/")
+	serviceDiscoveryURL := strings.TrimSuffix(getEnv("SERVICE_DISCOVERY_URL", "http://127.0.0.1:8761/eureka"), "/")
 	serverIP := getEnv("SERVER_IP", "127.0.0.1")
 	serviceName := getEnv("SERVICE_NAME", "gommunity-service")
 
@@ -82,6 +86,7 @@ func main() {
 	// Initialize repositories
 	userCollection := mongoConn.GetCollection("users")
 	roleCollection := mongoConn.GetCollection("roles")
+	communityCollection := mongoConn.GetCollection("communities")
 
 	// Create indexes
 	indexCtx, indexCancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -92,6 +97,7 @@ func main() {
 
 	userRepository := repositories.NewUserRepository(userCollection)
 	roleRepository := repositories.NewRoleRepository(roleCollection)
+	communityRepository := community_repositories.NewCommunityRepository(communityCollection)
 
 	// Seed roles
 	if err := seedRoles(context.Background(), roleRepository); err != nil {
@@ -105,7 +111,7 @@ func main() {
 		ServerIP:        serverIP,
 		Port:            port,
 		DiscoveryURL:    serviceDiscoveryURL,
-		HealthCheckURL:  fmt.Sprintf("http://%s:%s/health", serverIP, port),
+		HealthCheckURL:  fmt.Sprintf("http://%s:%s/", serverIP, port),
 		StatusPageURL:   fmt.Sprintf("http://%s:%s/swagger/index.html", serverIP, port),
 		HomePageURL:     fmt.Sprintf("http://%s:%s/", serverIP, port),
 		RenewalInterval: 30 * time.Second,
@@ -129,13 +135,16 @@ func main() {
 	// Initialize services
 	userQueryService := queryservices.NewUserQueryService(userRepository)
 	userCommandService := commandservices.NewUserCommandService(userRepository)
+	communityQueryService := community_queryservices.NewCommunityQueryService(communityRepository)
+	communityCommandService := community_commandservices.NewCommunityCommandService(communityRepository)
 
 	// Initialize event handlers
 	registrationHandler := eventhandlers.NewUserRegistrationHandler(userRepository)
 	profileUpdateHandler := eventhandlers.NewProfileUpdatedHandler(userRepository)
 
 	// Initialize controllers
-	userController := controllers.NewUserController(userCommandService, userQueryService)
+	userController := controllers.NewUserController(userCommandService, userQueryService, roleRepository)
+	communityController := community_controllers.NewCommunityController(communityCommandService, communityQueryService)
 
 	// Initialize JWT middleware
 	jwtMiddleware := middleware.NewJWTMiddleware(jwtSecret)
@@ -181,7 +190,6 @@ func main() {
 		c.Redirect(302, "/swagger/index.html")
 	})
 
-	r.GET("/health", healthHandler)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// User routes (protected with JWT)
@@ -191,6 +199,18 @@ func main() {
 		userRoutes.GET("/:id", userController.GetUserByID)
 		userRoutes.GET("/username/:username", userController.GetUserByUsername)
 		userRoutes.PUT("/:id/banner", userController.UpdateBannerURL)
+	}
+
+	// Community routes (protected with JWT)
+	communityRoutes := r.Group("/communities")
+	communityRoutes.Use(jwtMiddleware.AuthMiddleware())
+	{
+		communityRoutes.POST("", communityController.CreateCommunity)
+		communityRoutes.GET("", communityController.GetAllCommunities)
+		communityRoutes.GET("/my-communities", communityController.GetMyCommunitiesAsOwner)
+		communityRoutes.GET("/:id", communityController.GetCommunityByID)
+		communityRoutes.DELETE("/:id", communityController.DeleteCommunity)
+		communityRoutes.PATCH("/:id/privacy", communityController.UpdateCommunityPrivacy)
 	}
 
 	// Setup graceful shutdown
@@ -221,21 +241,6 @@ func main() {
 	cancel()
 
 	log.Println("Server exited")
-}
-
-// healthHandler godoc
-// @Summary Health check
-// @Description Get health status of the service
-// @Tags health
-// @Accept json
-// @Produce json
-// @Success 200 {object} map[string]string
-// @Router /health [get]
-func healthHandler(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"status":  "healthy",
-		"service": "gommunity",
-	})
 }
 
 // seedRoles seeds the default roles if they don't exist
