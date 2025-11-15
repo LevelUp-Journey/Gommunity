@@ -63,7 +63,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Create a new community (only for ROLE_TEACHER)",
+                "description": "Create a new community (only for ROLE_TEACHER and ROLE_ADMIN)",
                 "consumes": [
                     "application/json"
                 ],
@@ -204,6 +204,80 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update community name, description, icon and banner (only owner can update)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "communities"
+                ],
+                "summary": "Update community information",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Community ID (UUID)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Community update request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/resources.UpdateCommunityResource"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resources.CommunityResource"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
                         }
@@ -598,6 +672,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "A community for data science enthusiasts to share knowledge and collaborate"
                 },
+                "iconUrl": {
+                    "type": "string",
+                    "example": "https://example.com/icon.jpg"
+                },
                 "id": {
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
@@ -605,10 +683,6 @@ const docTemplate = `{
                 "isPrivate": {
                     "type": "boolean",
                     "example": false
-                },
-                "logoUrl": {
-                    "type": "string",
-                    "example": "https://example.com/logo.jpg"
                 },
                 "name": {
                     "type": "string",
@@ -631,11 +705,19 @@ const docTemplate = `{
                 "name"
             ],
             "properties": {
+                "bannerUrl": {
+                    "type": "string",
+                    "example": "https://example.com/banner.jpg"
+                },
                 "description": {
                     "type": "string",
                     "maxLength": 500,
                     "minLength": 10,
                     "example": "A community for data science enthusiasts to share knowledge and collaborate"
+                },
+                "iconUrl": {
+                    "type": "string",
+                    "example": "https://example.com/icon.jpg"
                 },
                 "name": {
                     "type": "string",
@@ -666,6 +748,31 @@ const docTemplate = `{
                 "isPrivate": {
                     "type": "boolean",
                     "example": true
+                }
+            }
+        },
+        "resources.UpdateCommunityResource": {
+            "type": "object",
+            "properties": {
+                "bannerUrl": {
+                    "type": "string",
+                    "example": "https://example.com/banner.jpg"
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "minLength": 10,
+                    "example": "Updated community description"
+                },
+                "iconUrl": {
+                    "type": "string",
+                    "example": "https://example.com/icon.jpg"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 3,
+                    "example": "Updated Community Name"
                 }
             }
         },
@@ -713,7 +820,7 @@ const docTemplate = `{
     },
     "securityDefinitions": {
         "BearerAuth": {
-            "description": "Type \"Bearer\" followed by a space and JWT token.",
+            "description": "Enter your JWT token directly (Bearer prefix is optional).",
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"

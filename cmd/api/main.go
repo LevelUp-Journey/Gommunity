@@ -18,6 +18,7 @@ import (
 	"Gommunity/internal/community/users/application/commandservices"
 	"Gommunity/internal/community/users/application/eventhandlers"
 	"Gommunity/internal/community/users/application/queryservices"
+	user_services "Gommunity/internal/community/users/application/services"
 	"Gommunity/internal/community/users/domain/model/entities"
 	"Gommunity/internal/community/users/domain/model/valueobjects"
 	domain_repos "Gommunity/internal/community/users/domain/repositories"
@@ -44,7 +45,7 @@ import (
 // @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization
-// @description Type "Bearer" followed by a space and JWT token.
+// @description Enter your JWT token directly (Bearer prefix is optional).
 func main() {
 	// Load .env file
 	err := godotenv.Load()
@@ -146,8 +147,11 @@ func main() {
 	userController := controllers.NewUserController(userCommandService, userQueryService, roleRepository)
 	communityController := community_controllers.NewCommunityController(communityCommandService, communityQueryService)
 
-	// Initialize JWT middleware
-	jwtMiddleware := middleware.NewJWTMiddleware(jwtSecret)
+	// Initialize user role provider
+	userRoleProvider := user_services.NewUserRoleProviderService(userRepository, roleRepository)
+
+	// Initialize JWT middleware with role provider
+	jwtMiddleware := middleware.NewJWTMiddlewareWithRoleProvider(jwtSecret, userRoleProvider)
 
 	// Initialize Kafka event consumer
 	kafkaEventConsumer := messaging.NewKafkaEventConsumer(registrationHandler, profileUpdateHandler)
@@ -209,6 +213,7 @@ func main() {
 		communityRoutes.GET("", communityController.GetAllCommunities)
 		communityRoutes.GET("/my-communities", communityController.GetMyCommunitiesAsOwner)
 		communityRoutes.GET("/:id", communityController.GetCommunityByID)
+		communityRoutes.PUT("/:id", communityController.UpdateCommunityInfo)
 		communityRoutes.DELETE("/:id", communityController.DeleteCommunity)
 		communityRoutes.PATCH("/:id/privacy", communityController.UpdateCommunityPrivacy)
 	}
@@ -249,9 +254,10 @@ func seedRoles(ctx context.Context, roleRepo domain_repos.RoleRepository) error 
 		id   string
 		name string
 	}{
-		{valueobjects.UserRoleIDStr, "user"},
-		{valueobjects.MemberRoleIDStr, "member"},
+		{valueobjects.StudentRoleIDStr, "student"},
+		{valueobjects.TeacherRoleIDStr, "teacher"},
 		{valueobjects.AdminRoleIDStr, "admin"},
+		{valueobjects.MemberRoleIDStr, "member"},
 		{valueobjects.OwnerRoleIDStr, "owner"},
 	}
 

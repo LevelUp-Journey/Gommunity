@@ -10,12 +10,16 @@ type CreateCommunityCommand struct {
 	ownerID     valueobjects.OwnerID
 	name        valueobjects.CommunityName
 	description valueobjects.Description
+	iconURL     *string
+	bannerURL   *string
 }
 
 func NewCreateCommunityCommand(
 	ownerID valueobjects.OwnerID,
 	name valueobjects.CommunityName,
 	description valueobjects.Description,
+	iconURL *string,
+	bannerURL *string,
 ) (CreateCommunityCommand, error) {
 	if ownerID.IsZero() {
 		return CreateCommunityCommand{}, errors.New("ownerID cannot be empty")
@@ -33,6 +37,8 @@ func NewCreateCommunityCommand(
 		ownerID:     ownerID,
 		name:        name,
 		description: description,
+		iconURL:     iconURL,
+		bannerURL:   bannerURL,
 	}, nil
 }
 
@@ -46,4 +52,12 @@ func (c CreateCommunityCommand) Name() valueobjects.CommunityName {
 
 func (c CreateCommunityCommand) Description() valueobjects.Description {
 	return c.description
+}
+
+func (c CreateCommunityCommand) IconURL() *string {
+	return c.iconURL
+}
+
+func (c CreateCommunityCommand) BannerURL() *string {
+	return c.bannerURL
 }

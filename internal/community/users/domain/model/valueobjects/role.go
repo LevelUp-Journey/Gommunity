@@ -7,10 +7,14 @@ import (
 
 // Predefined role IDs (UUIDs)
 const (
-	UserRoleIDStr   = "550e8400-e29b-41d4-a716-446655440001"
-	MemberRoleIDStr = "550e8400-e29b-41d4-a716-446655440002"
-	AdminRoleIDStr  = "550e8400-e29b-41d4-a716-446655440003"
-	OwnerRoleIDStr  = "550e8400-e29b-41d4-a716-446655440004"
+	StudentRoleIDStr = "550e8400-e29b-41d4-a716-446655440001"
+	TeacherRoleIDStr = "550e8400-e29b-41d4-a716-446655440002"
+	AdminRoleIDStr   = "550e8400-e29b-41d4-a716-446655440003"
+	MemberRoleIDStr  = "550e8400-e29b-41d4-a716-446655440004"
+	OwnerRoleIDStr   = "550e8400-e29b-41d4-a716-446655440005"
+
+	// Deprecated - for backward compatibility
+	UserRoleIDStr = StudentRoleIDStr
 )
 
 type Role struct {
@@ -18,10 +22,11 @@ type Role struct {
 }
 
 var validRoles = map[string]bool{
-	"user":   true,
-	"member": true,
-	"admin":  true,
-	"owner":  true,
+	"student": true,
+	"teacher": true,
+	"admin":   true,
+	"member":  true,
+	"owner":   true,
 }
 
 func NewRole(value string) (Role, error) {
@@ -30,7 +35,7 @@ func NewRole(value string) (Role, error) {
 		return Role{}, errors.New("role cannot be empty")
 	}
 	if !validRoles[normalized] {
-		return Role{}, errors.New("invalid role: must be one of user, member, admin, owner")
+		return Role{}, errors.New("invalid role: must be one of student, teacher, admin, member, owner")
 	}
 	return Role{value: normalized}, nil
 }
@@ -49,8 +54,12 @@ func (r Role) IsZero() bool {
 
 // Predefined roles for convenience
 var (
-	UserRole   = Role{value: "user"}
-	MemberRole = Role{value: "member"}
-	AdminRole  = Role{value: "admin"}
-	OwnerRole  = Role{value: "owner"}
+	StudentRole = Role{value: "student"}
+	TeacherRole = Role{value: "teacher"}
+	AdminRole   = Role{value: "admin"}
+	MemberRole  = Role{value: "member"}
+	OwnerRole   = Role{value: "owner"}
+
+	// Deprecated - for backward compatibility
+	UserRole = StudentRole
 )

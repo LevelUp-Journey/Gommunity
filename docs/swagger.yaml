@@ -26,15 +26,15 @@ definitions:
       description:
         example: A community for data science enthusiasts to share knowledge and collaborate
         type: string
+      iconUrl:
+        example: https://example.com/icon.jpg
+        type: string
       id:
         example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       isPrivate:
         example: false
         type: boolean
-      logoUrl:
-        example: https://example.com/logo.jpg
-        type: string
       name:
         example: Data Science Community
         type: string
@@ -47,10 +47,16 @@ definitions:
     type: object
   resources.CreateCommunityResource:
     properties:
+      bannerUrl:
+        example: https://example.com/banner.jpg
+        type: string
       description:
         example: A community for data science enthusiasts to share knowledge and collaborate
         maxLength: 500
         minLength: 10
+        type: string
+      iconUrl:
+        example: https://example.com/icon.jpg
         type: string
       name:
         example: Data Science Community
@@ -76,6 +82,25 @@ definitions:
         type: boolean
     required:
     - isPrivate
+    type: object
+  resources.UpdateCommunityResource:
+    properties:
+      bannerUrl:
+        example: https://example.com/banner.jpg
+        type: string
+      description:
+        example: Updated community description
+        maxLength: 500
+        minLength: 10
+        type: string
+      iconUrl:
+        example: https://example.com/icon.jpg
+        type: string
+      name:
+        example: Updated Community Name
+        maxLength: 100
+        minLength: 3
+        type: string
     type: object
   resources.UserResource:
     properties:
@@ -144,7 +169,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a new community (only for ROLE_TEACHER)
+      description: Create a new community (only for ROLE_TEACHER and ROLE_ADMIN)
       parameters:
       - description: Community creation request
         in: body
@@ -257,6 +282,55 @@ paths:
       security:
       - BearerAuth: []
       summary: Get community by ID
+      tags:
+      - communities
+    put:
+      consumes:
+      - application/json
+      description: Update community name, description, icon and banner (only owner
+        can update)
+      parameters:
+      - description: Community ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Community update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/resources.UpdateCommunityResource'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resources.CommunityResource'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update community information
       tags:
       - communities
   /communities/{id}/privacy:
@@ -464,7 +538,7 @@ paths:
       - users
 securityDefinitions:
   BearerAuth:
-    description: Type "Bearer" followed by a space and JWT token.
+    description: Enter your JWT token directly (Bearer prefix is optional).
     in: header
     name: Authorization
     type: apiKey

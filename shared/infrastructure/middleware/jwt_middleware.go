@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"errors"
 	"log"
 	"net/http"
@@ -10,22 +11,36 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type JWTMiddleware struct {
-	secretKey []byte
+type UserRoleProvider interface {
+	GetUserRoleByUserID(ctx context.Context, userID string) (string, error)
 }
 
-// Claims represents the JWT claims structure
+type JWTMiddleware struct {
+	secretKey    []byte
+	roleProvider UserRoleProvider
+}
+
+// Claims represents the JWT claims structure from IAM service
 type Claims struct {
-	UserID    string `json:"userId"`
-	Email     string `json:"email"`
-	Role      string `json:"role"`
-	ProfileID string `json:"profileId"`
+	UserID    string   `json:"userId"`
+	Email     string   `json:"email"`
+	Username  string   `json:"username"`
+	Roles     []string `json:"roles"` // Array of roles from IAM: ["TEACHER", "ADMIN"]
+	ProfileID string   `json:"profileId"`
 	jwt.RegisteredClaims
 }
 
 func NewJWTMiddleware(secretKey string) *JWTMiddleware {
 	return &JWTMiddleware{
-		secretKey: []byte(secretKey),
+		secretKey:    []byte(secretKey),
+		roleProvider: nil,
+	}
+}
+
+func NewJWTMiddlewareWithRoleProvider(secretKey string, roleProvider UserRoleProvider) *JWTMiddleware {
+	return &JWTMiddleware{
+		secretKey:    []byte(secretKey),
+		roleProvider: roleProvider,
 	}
 }
 
@@ -39,15 +54,11 @@ func (jm *JWTMiddleware) AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Extract token from "Bearer <token>"
-		parts := strings.SplitN(authHeader, " ", 2)
-		if len(parts) != 2 || parts[0] != "Bearer" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization format. Expected 'Bearer <token>'"})
-			c.Abort()
-			return
+		// Extract token - support both "Bearer <token>" and direct token
+		tokenString := authHeader
+		if strings.HasPrefix(authHeader, "Bearer ") {
+			tokenString = strings.TrimPrefix(authHeader, "Bearer ")
 		}
-
-		tokenString := parts[1]
 
 		// Parse and validate token
 		claims, err := jm.ValidateToken(tokenString)
@@ -61,10 +72,34 @@ func (jm *JWTMiddleware) AuthMiddleware() gin.HandlerFunc {
 		// Set claims in context for use in handlers
 		c.Set("userID", claims.UserID)
 		c.Set("email", claims.Email)
-		c.Set("role", claims.Role)
+		c.Set("username", claims.Username)
 		c.Set("profileID", claims.ProfileID)
 
-		log.Printf("Authenticated user: %s (UserID: %s)", claims.Email, claims.UserID)
+		// Get primary role from JWT roles array
+		// IAM sends roles as ["TEACHER", "ADMIN"], we need to extract the primary one
+		var role string
+		if len(claims.Roles) > 0 {
+			// Use first role and add ROLE_ prefix if not present
+			role = claims.Roles[0]
+			if !strings.HasPrefix(role, "ROLE_") {
+				role = "ROLE_" + role
+			}
+		}
+
+		// If no role in JWT and provider is available, fetch from database
+		if role == "" && jm.roleProvider != nil {
+			fetchedRole, err := jm.roleProvider.GetUserRoleByUserID(c.Request.Context(), claims.UserID)
+			if err != nil {
+				log.Printf("Failed to fetch role for user %s: %v", claims.UserID, err)
+			} else {
+				role = fetchedRole
+			}
+		}
+
+		c.Set("role", role)
+		c.Set("roles", claims.Roles) // Store all roles for advanced authorization
+
+		log.Printf("Authenticated user: %s (UserID: %s, Role: '%s', AllRoles: %v)", claims.Email, claims.UserID, role, claims.Roles)
 		c.Next()
 	}
 }

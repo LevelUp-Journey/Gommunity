@@ -31,7 +31,7 @@ type communityDocument struct {
 	OwnerID     string  `bson:"owner_id"`
 	Name        string  `bson:"name"`
 	Description string  `bson:"description"`
-	LogoURL     *string `bson:"logo_url"`
+	IconURL     *string `bson:"icon_url"`
 	BannerURL   *string `bson:"banner_url"`
 	IsPrivate   bool    `bson:"is_private"`
 	CreatedAt   int64   `bson:"created_at"`
@@ -63,7 +63,7 @@ func (r *communityRepositoryImpl) Update(ctx context.Context, community *entitie
 		"$set": bson.M{
 			"name":        community.Name().Value(),
 			"description": community.Description().Value(),
-			"logo_url":    community.LogoURL(),
+			"icon_url":    community.IconURL(),
 			"banner_url":  community.BannerURL(),
 			"is_private":  community.IsPrivate(),
 			"updated_at":  community.UpdatedAt().Unix(),
@@ -211,7 +211,7 @@ func (r *communityRepositoryImpl) entityToDocument(community *entities.Community
 		OwnerID:     community.OwnerID().Value(),
 		Name:        community.Name().Value(),
 		Description: community.Description().Value(),
-		LogoURL:     community.LogoURL(),
+		IconURL:     community.IconURL(),
 		BannerURL:   community.BannerURL(),
 		IsPrivate:   community.IsPrivate(),
 		CreatedAt:   community.CreatedAt().Unix(),
@@ -235,18 +235,9 @@ func (r *communityRepositoryImpl) documentToEntity(doc *communityDocument) (*ent
 		return nil, err
 	}
 
-	community, err := entities.NewCommunity(ownerID, name, description)
+	community, err := entities.NewCommunity(ownerID, name, description, doc.IconURL, doc.BannerURL)
 	if err != nil {
 		return nil, err
-	}
-
-	// Set additional fields
-	if doc.LogoURL != nil {
-		community.UpdateLogoURL(*doc.LogoURL)
-	}
-
-	if doc.BannerURL != nil {
-		community.UpdateBannerURL(*doc.BannerURL)
 	}
 
 	if doc.IsPrivate {

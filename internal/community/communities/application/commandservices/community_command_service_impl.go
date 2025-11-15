@@ -33,6 +33,8 @@ func (s *communityCommandServiceImpl) HandleCreate(ctx context.Context, cmd comm
 		cmd.OwnerID(),
 		cmd.Name(),
 		cmd.Description(),
+		cmd.IconURL(),
+		cmd.BannerURL(),
 	)
 	if err != nil {
 		log.Printf("Error creating community entity: %v", err)
@@ -109,5 +111,32 @@ func (s *communityCommandServiceImpl) HandleUpdatePrivacy(ctx context.Context, c
 	}
 
 	log.Printf("Community privacy updated successfully: %s, isPrivate: %v", cmd.CommunityID().Value(), cmd.IsPrivate())
+	return nil
+}
+
+func (s *communityCommandServiceImpl) HandleUpdateInfo(ctx context.Context, cmd commands.UpdateCommunityInfoCommand) error {
+	log.Printf("Updating info for community: %s", cmd.CommunityID().Value())
+
+	// Find community
+	community, err := s.communityRepo.FindByID(ctx, cmd.CommunityID())
+	if err != nil {
+		log.Printf("Error finding community: %v", err)
+		return err
+	}
+
+	if community == nil {
+		return errors.New("community not found")
+	}
+
+	// Update community info
+	community.UpdateInfo(cmd.Name(), cmd.Description(), cmd.IconURL(), cmd.BannerURL())
+
+	// Save updated community
+	if err := s.communityRepo.Update(ctx, community); err != nil {
+		log.Printf("Error updating community info: %v", err)
+		return err
+	}
+
+	log.Printf("Community info updated successfully: %s", cmd.CommunityID().Value())
 	return nil
 }

@@ -14,7 +14,7 @@ type Community struct {
 	ownerID     valueobjects.OwnerID       `bson:"owner_id"`
 	name        valueobjects.CommunityName `bson:"name"`
 	description valueobjects.Description   `bson:"description"`
-	logoURL     *string                    `bson:"logo_url"`
+	iconURL     *string                    `bson:"icon_url"`
 	bannerURL   *string                    `bson:"banner_url"`
 	isPrivate   bool                       `bson:"is_private"`
 	createdAt   time.Time                  `bson:"created_at"`
@@ -26,6 +26,8 @@ func NewCommunity(
 	ownerID valueobjects.OwnerID,
 	name valueobjects.CommunityName,
 	description valueobjects.Description,
+	iconURL *string,
+	bannerURL *string,
 ) (*Community, error) {
 	now := time.Now()
 	communityID := uuid.New().String()
@@ -41,8 +43,8 @@ func NewCommunity(
 		ownerID:     ownerID,
 		name:        name,
 		description: description,
-		logoURL:     nil,
-		bannerURL:   nil,
+		iconURL:     iconURL,
+		bannerURL:   bannerURL,
 		isPrivate:   false,
 		createdAt:   now,
 		updatedAt:   now,
@@ -70,8 +72,8 @@ func (c *Community) Description() valueobjects.Description {
 	return c.description
 }
 
-func (c *Community) LogoURL() *string {
-	return c.logoURL
+func (c *Community) IconURL() *string {
+	return c.iconURL
 }
 
 func (c *Community) BannerURL() *string {
@@ -91,14 +93,20 @@ func (c *Community) UpdatedAt() time.Time {
 }
 
 // Business methods
-func (c *Community) UpdateInfo(name valueobjects.CommunityName, description valueobjects.Description) {
+func (c *Community) UpdateInfo(name valueobjects.CommunityName, description valueobjects.Description, iconURL *string, bannerURL *string) {
 	c.name = name
 	c.description = description
+	if iconURL != nil {
+		c.iconURL = iconURL
+	}
+	if bannerURL != nil {
+		c.bannerURL = bannerURL
+	}
 	c.updatedAt = time.Now()
 }
 
-func (c *Community) UpdateLogoURL(logoURL string) {
-	c.logoURL = &logoURL
+func (c *Community) UpdateIconURL(iconURL string) {
+	c.iconURL = &iconURL
 	c.updatedAt = time.Now()
 }
 

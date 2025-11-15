@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 
 	"Gommunity/internal/community/communities/domain/model/commands"
@@ -31,7 +32,7 @@ func NewCommunityController(
 
 // CreateCommunity godoc
 // @Summary Create a new community
-// @Description Create a new community (only for ROLE_TEACHER)
+// @Description Create a new community (only for ROLE_TEACHER and ROLE_ADMIN)
 // @Tags communities
 // @Accept json
 // @Produce json
@@ -62,10 +63,13 @@ func (c *CommunityController) CreateCommunity(ctx *gin.Context) {
 		return
 	}
 
-	// Verify user has ROLE_TEACHER
+	log.Printf("Creating community - User: %s, Role: '%s'", authenticatedUserID, role)
+
+	// Verify user has ROLE_TEACHER or ROLE_ADMIN
 	if role != "ROLE_TEACHER" && role != "ROLE_ADMIN" {
+		log.Printf("Access denied - Role '%s' is not authorized to create communities", role)
 		ctx.JSON(http.StatusForbidden, resources.ErrorResponse{
-			Error: "Only teachers can create communities",
+			Error: "Only teachers and admins can create communities",
 		})
 		return
 	}
@@ -104,7 +108,7 @@ func (c *CommunityController) CreateCommunity(ctx *gin.Context) {
 	}
 
 	// Create command
-	cmd, err := commands.NewCreateCommunityCommand(ownerID, name, description)
+	cmd, err := commands.NewCreateCommunityCommand(ownerID, name, description, req.IconURL, req.BannerURL)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, resources.ErrorResponse{
 			Error: err.Error(),
@@ -342,6 +346,142 @@ func (c *CommunityController) DeleteCommunity(ctx *gin.Context) {
 	ctx.Status(http.StatusNoContent)
 }
 
+// UpdateCommunityInfo godoc
+// @Summary Update community information
+// @Description Update community name, description, icon and banner (only owner can update)
+// @Tags communities
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Community ID (UUID)"
+// @Param request body resources.UpdateCommunityResource true "Community update request"
+// @Success 200 {object} resources.CommunityResource
+// @Failure 400 {object} resources.ErrorResponse
+// @Failure 401 {object} resources.ErrorResponse
+// @Failure 403 {object} resources.ErrorResponse
+// @Failure 404 {object} resources.ErrorResponse
+// @Failure 500 {object} resources.ErrorResponse
+// @Router /communities/{id} [put]
+func (c *CommunityController) UpdateCommunityInfo(ctx *gin.Context) {
+	communityIDParam := ctx.Param("id")
+
+	// Get authenticated user ID from context
+	authenticatedUserID, err := middleware.GetUserIDFromContext(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, resources.ErrorResponse{
+			Error: "Authentication required",
+		})
+		return
+	}
+
+	communityID, err := valueobjects.NewCommunityID(communityIDParam)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, resources.ErrorResponse{
+			Error: "Invalid community ID format",
+		})
+		return
+	}
+
+	var req resources.UpdateCommunityResource
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, resources.ErrorResponse{
+			Error: "Invalid request body",
+		})
+		return
+	}
+
+	// Validate that at least one field is provided
+	if req.Name == nil && req.Description == nil && req.IconURL == nil && req.BannerURL == nil {
+		ctx.JSON(http.StatusBadRequest, resources.ErrorResponse{
+			Error: "At least one field must be provided for update",
+		})
+		return
+	}
+
+	// First, verify the community exists and the user is the owner
+	query, err := queries.NewGetCommunityByIDQuery(communityID)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, resources.ErrorResponse{
+			Error: err.Error(),
+		})
+		return
+	}
+
+	community, err := c.queryService.HandleGetByID(ctx.Request.Context(), query)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, resources.ErrorResponse{
+			Error: "Failed to retrieve community",
+		})
+		return
+	}
+
+	if community == nil {
+		ctx.JSON(http.StatusNotFound, resources.ErrorResponse{
+			Error: "Community not found",
+		})
+		return
+	}
+
+	// Verify the user is the owner
+	if !community.IsOwner(authenticatedUserID) {
+		ctx.JSON(http.StatusForbidden, resources.ErrorResponse{
+			Error: "Only the owner can update community information",
+		})
+		return
+	}
+
+	// Use existing values if not provided in request
+	name := community.Name()
+	if req.Name != nil {
+		name, err = valueobjects.NewCommunityName(*req.Name)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, resources.ErrorResponse{
+				Error: err.Error(),
+			})
+			return
+		}
+	}
+
+	description := community.Description()
+	if req.Description != nil {
+		description, err = valueobjects.NewDescription(*req.Description)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, resources.ErrorResponse{
+				Error: err.Error(),
+			})
+			return
+		}
+	}
+
+	// Create and execute command
+	cmd, err := commands.NewUpdateCommunityInfoCommand(communityID, name, description, req.IconURL, req.BannerURL)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, resources.ErrorResponse{
+			Error: err.Error(),
+		})
+		return
+	}
+
+	if err := c.commandService.HandleUpdateInfo(ctx.Request.Context(), cmd); err != nil {
+		ctx.JSON(http.StatusInternalServerError, resources.ErrorResponse{
+			Error: "Failed to update community information",
+		})
+		return
+	}
+
+	// Retrieve updated community
+	updatedCommunity, err := c.queryService.HandleGetByID(ctx.Request.Context(), query)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, resources.ErrorResponse{
+			Error: "Failed to retrieve updated community",
+		})
+		return
+	}
+
+	response := c.transformCommunityToResource(updatedCommunity)
+	ctx.JSON(http.StatusOK, response)
+}
+
 // UpdateCommunityPrivacy godoc
 // @Summary Update community privacy status
 // @Description Update the privacy status of a community (only owner can update)
@@ -454,7 +594,7 @@ func (c *CommunityController) transformCommunityToResource(community *entities.C
 		OwnerID:     community.OwnerID().Value(),
 		Name:        community.Name().Value(),
 		Description: community.Description().Value(),
-		LogoURL:     community.LogoURL(),
+		IconURL:     community.IconURL(),
 		BannerURL:   community.BannerURL(),
 		IsPrivate:   community.IsPrivate(),
 		CreatedAt:   community.CreatedAt(),
