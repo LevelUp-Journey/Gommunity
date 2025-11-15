@@ -143,7 +143,7 @@ func main() {
 
 	// Initialize Kafka consumer
 	kafkaConsumer := kafka.NewKafkaConsumer(kafka.KafkaConfig{
-		BootstrapServers: cfg.KafkaBootstrapServers,
+		BootstrapServers: cfg.Kafka.BootstrapServers,
 		GroupID:          "gommunity-consumer-group",
 		Topics: []string{
 			messaging.TopicCommunityRegistration,
