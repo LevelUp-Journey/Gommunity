@@ -46,13 +46,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     }
                 }
@@ -95,25 +95,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     }
                 }
@@ -150,13 +150,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     }
                 }
@@ -199,25 +199,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     }
                 }
@@ -267,31 +267,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     }
                 }
@@ -329,31 +329,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     }
                 }
@@ -405,31 +405,369 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/subscriptions": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Subscribe a user to a community with a specific role. IMPORTANT: Self-subscriptions (following a community) always receive 'member' role regardless of requested role. In public communities, users can only subscribe themselves. In private communities, owner/admin can add users by username and assign any role.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "subscriptions"
+                ],
+                "summary": "Subscribe a user to a community",
+                "parameters": [
+                    {
+                        "description": "Subscription request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/resources.SubscribeUserResource"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/resources.SubscriptionResource"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Remove a user's subscription from a community. Users can unsubscribe themselves, or owner/admin can remove users.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "subscriptions"
+                ],
+                "summary": "Unsubscribe a user from a community",
+                "parameters": [
+                    {
+                        "description": "Unsubscribe request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/resources.UnsubscribeUserResource"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/subscriptions/communities/{community_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all subscriptions for a specific community with optional pagination",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "subscriptions"
+                ],
+                "summary": "Get all subscriptions for a community",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Community ID",
+                        "name": "community_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resources.SubscriptionListResource"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/subscriptions/communities/{community_id}/count": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get the total number of subscriptions for a specific community",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "subscriptions"
+                ],
+                "summary": "Get subscription count for a community",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Community ID",
+                        "name": "community_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resources.SubscriptionCountResource"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/subscriptions/users/{user_id}/communities/{community_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get a specific subscription for a user in a community",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "subscriptions"
+                ],
+                "summary": "Get subscription by user and community",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Community ID",
+                        "name": "community_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resources.SubscriptionResource"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -472,25 +810,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse"
                         }
                     }
                 }
@@ -533,25 +871,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse"
                         }
                     }
                 }
@@ -603,31 +941,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse"
+                            "$ref": "#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse"
                         }
                     }
                 }
@@ -635,7 +973,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "Gommunity_internal_community_communities_interfaces_rest_resources.ErrorResponse": {
+        "Gommunity_platform_community_interfaces_rest_resources.ErrorResponse": {
             "type": "object",
             "properties": {
                 "error": {
@@ -644,7 +982,7 @@ const docTemplate = `{
                 }
             }
         },
-        "Gommunity_internal_community_users_interfaces_rest_resources.ErrorResponse": {
+        "Gommunity_platform_users_interfaces_rest_resources.ErrorResponse": {
             "type": "object",
             "properties": {
                 "error": {
@@ -724,6 +1062,112 @@ const docTemplate = `{
                     "maxLength": 100,
                     "minLength": 3,
                     "example": "Data Science Community"
+                }
+            }
+        },
+        "resources.SubscribeUserResource": {
+            "type": "object",
+            "required": [
+                "community_id",
+                "role"
+            ],
+            "properties": {
+                "community_id": {
+                    "type": "string",
+                    "example": "507f1f77bcf86cd799439012"
+                },
+                "role": {
+                    "type": "string",
+                    "enum": [
+                        "member",
+                        "admin",
+                        "owner"
+                    ],
+                    "example": "member"
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "507f1f77bcf86cd799439013"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 3,
+                    "example": "john_doe"
+                }
+            }
+        },
+        "resources.SubscriptionCountResource": {
+            "type": "object",
+            "properties": {
+                "community_id": {
+                    "type": "string",
+                    "example": "507f1f77bcf86cd799439012"
+                },
+                "count": {
+                    "type": "integer",
+                    "example": 150
+                }
+            }
+        },
+        "resources.SubscriptionListResource": {
+            "type": "object",
+            "properties": {
+                "subscriptions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/resources.SubscriptionResource"
+                    }
+                },
+                "total": {
+                    "type": "integer",
+                    "example": 150
+                }
+            }
+        },
+        "resources.SubscriptionResource": {
+            "type": "object",
+            "properties": {
+                "community_id": {
+                    "type": "string",
+                    "example": "507f1f77bcf86cd799439012"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2023-01-01T00:00:00Z"
+                },
+                "role": {
+                    "type": "string",
+                    "example": "member"
+                },
+                "subscription_id": {
+                    "type": "string",
+                    "example": "507f1f77bcf86cd799439011"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2023-01-01T00:00:00Z"
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "507f1f77bcf86cd799439013"
+                }
+            }
+        },
+        "resources.UnsubscribeUserResource": {
+            "type": "object",
+            "required": [
+                "community_id",
+                "user_id"
+            ],
+            "properties": {
+                "community_id": {
+                    "type": "string",
+                    "example": "507f1f77bcf86cd799439012"
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "507f1f77bcf86cd799439013"
                 }
             }
         },

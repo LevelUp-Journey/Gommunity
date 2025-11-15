@@ -10,22 +10,31 @@ import (
 	"time"
 
 	"Gommunity/docs"
-	community_commandservices "Gommunity/internal/community/communities/application/commandservices"
-	community_queryservices "Gommunity/internal/community/communities/application/queryservices"
-	community_repositories "Gommunity/internal/community/communities/infrastructure/persistence/repositories"
-	community_controllers "Gommunity/internal/community/communities/interfaces/rest/controllers"
-	"Gommunity/internal/community/users/application/commandservices"
-	"Gommunity/internal/community/users/application/eventhandlers"
-	"Gommunity/internal/community/users/application/queryservices"
-	user_services "Gommunity/internal/community/users/application/services"
-	"Gommunity/internal/community/users/infrastructure/messaging"
-	"Gommunity/internal/community/users/infrastructure/persistence/repositories"
-	"Gommunity/internal/community/users/interfaces/rest/controllers"
+	community_commandservices "Gommunity/platform/community/application/commandservices"
+	community_queryservices "Gommunity/platform/community/application/queryservices"
+	community_repositories "Gommunity/platform/community/infrastructure/persistence/repositories"
+	community_controllers "Gommunity/platform/community/interfaces/rest/controllers"
+	"Gommunity/platform/users/application/commandservices"
+	"Gommunity/platform/users/application/eventhandlers"
+	"Gommunity/platform/users/application/queryservices"
+	user_services "Gommunity/platform/users/application/services"
+	"Gommunity/platform/users/infrastructure/messaging"
+	"Gommunity/platform/users/infrastructure/persistence/repositories"
+	"Gommunity/platform/users/interfaces/rest/controllers"
 	"Gommunity/shared/config"
 	"Gommunity/shared/infrastructure/discovery"
 	"Gommunity/shared/infrastructure/messaging/kafka"
 	"Gommunity/shared/infrastructure/middleware"
 	"Gommunity/shared/infrastructure/persistence/mongodb"
+
+	// Subscriptions BC imports
+	communities_acl "Gommunity/platform/community/application/acl"
+	subscription_commandservices "Gommunity/platform/subscriptions/application/commandservices"
+	subscription_acl "Gommunity/platform/subscriptions/application/outboundservices/acl"
+	subscription_queryservices "Gommunity/platform/subscriptions/application/queryservices"
+	subscription_repositories "Gommunity/platform/subscriptions/infrastructure/persistence/repositories"
+	subscription_controllers "Gommunity/platform/subscriptions/interfaces/rest/controllers"
+	users_acl "Gommunity/platform/users/application/acl"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -73,6 +82,7 @@ func main() {
 	userCollection := mongoConn.GetCollection("users")
 	roleCollection := mongoConn.GetCollection("roles")
 	communityCollection := mongoConn.GetCollection("communities")
+	subscriptionCollection := mongoConn.GetCollection("subscriptions")
 
 	// Create indexes
 	indexCtx, indexCancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -84,6 +94,7 @@ func main() {
 	userRepository := repositories.NewUserRepository(userCollection)
 	roleRepository := repositories.NewRoleRepository(roleCollection)
 	communityRepository := community_repositories.NewCommunityRepository(communityCollection)
+	subscriptionRepository := subscription_repositories.NewSubscriptionRepository(subscriptionCollection)
 
 	// Seed roles
 	if err := eventhandlers.SeedRoles(context.Background(), roleRepository); err != nil {
@@ -118,11 +129,27 @@ func main() {
 		}
 	}
 
+	// Initialize ACL facades
+	usersFacade := users_acl.NewUsersFacade(userRepository, roleRepository)
+	communitiesFacade := communities_acl.NewCommunitiesFacade(communityRepository)
+
 	// Initialize services
 	userQueryService := queryservices.NewUserQueryService(userRepository)
 	userCommandService := commandservices.NewUserCommandService(userRepository)
 	communityQueryService := community_queryservices.NewCommunityQueryService(communityRepository)
 	communityCommandService := community_commandservices.NewCommunityCommandService(communityRepository)
+
+	// Initialize Subscriptions BC services
+	externalUsersService := subscription_acl.NewExternalUsersService(usersFacade)
+	externalCommunitiesService := subscription_acl.NewExternalCommunitiesService(communitiesFacade)
+	subscriptionCommandService := subscription_commandservices.NewSubscriptionCommandService(
+		subscriptionRepository,
+		externalUsersService,
+		externalCommunitiesService,
+	)
+	subscriptionQueryService := subscription_queryservices.NewSubscriptionQueryService(
+		subscriptionRepository,
+	)
 
 	// Initialize event handlers
 	registrationHandler := eventhandlers.NewUserRegistrationHandler(userRepository)
@@ -131,6 +158,11 @@ func main() {
 	// Initialize controllers
 	userController := controllers.NewUserController(userCommandService, userQueryService, roleRepository)
 	communityController := community_controllers.NewCommunityController(communityCommandService, communityQueryService)
+	subscriptionController := subscription_controllers.NewSubscriptionController(
+		subscriptionCommandService,
+		subscriptionQueryService,
+		externalUsersService,
+	)
 
 	// Initialize user role provider
 	userRoleProvider := user_services.NewUserRoleProviderService(userRepository, roleRepository)
@@ -201,6 +233,17 @@ func main() {
 		communityRoutes.PUT("/:id", communityController.UpdateCommunityInfo)
 		communityRoutes.DELETE("/:id", communityController.DeleteCommunity)
 		communityRoutes.PATCH("/:id/privacy", communityController.UpdateCommunityPrivacy)
+	}
+
+	// Subscription routes (protected with JWT)
+	subscriptionRoutes := r.Group("/subscriptions")
+	subscriptionRoutes.Use(jwtMiddleware.AuthMiddleware())
+	{
+		subscriptionRoutes.POST("", subscriptionController.SubscribeUser)
+		subscriptionRoutes.DELETE("", subscriptionController.UnsubscribeUser)
+		subscriptionRoutes.GET("/communities/:community_id/count", subscriptionController.GetSubscriptionCount)
+		subscriptionRoutes.GET("/communities/:community_id", subscriptionController.GetAllSubscriptionsByCommunity)
+		subscriptionRoutes.GET("/users/:user_id/communities/:community_id", subscriptionController.GetSubscriptionByUserAndCommunity)
 	}
 
 	// Setup graceful shutdown
