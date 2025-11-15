@@ -14,6 +14,11 @@ import (
 	community_queryservices "Gommunity/platform/community/application/queryservices"
 	community_repositories "Gommunity/platform/community/infrastructure/persistence/repositories"
 	community_controllers "Gommunity/platform/community/interfaces/rest/controllers"
+	posts_commandservices "Gommunity/platform/posts/application/commandservices"
+	posts_acl "Gommunity/platform/posts/application/outboundservices/acl"
+	posts_queryservices "Gommunity/platform/posts/application/queryservices"
+	posts_repositories "Gommunity/platform/posts/infrastructure/persistence/repositories"
+	posts_controllers "Gommunity/platform/posts/interfaces/rest/controllers"
 	"Gommunity/platform/users/application/commandservices"
 	"Gommunity/platform/users/application/eventhandlers"
 	"Gommunity/platform/users/application/queryservices"
@@ -29,8 +34,9 @@ import (
 
 	// Subscriptions BC imports
 	communities_acl "Gommunity/platform/community/application/acl"
+	subscriptions_acl "Gommunity/platform/subscriptions/application/acl"
 	subscription_commandservices "Gommunity/platform/subscriptions/application/commandservices"
-	subscription_acl "Gommunity/platform/subscriptions/application/outboundservices/acl"
+	subscriptions_outbound_acl "Gommunity/platform/subscriptions/application/outboundservices/acl"
 	subscription_queryservices "Gommunity/platform/subscriptions/application/queryservices"
 	subscription_repositories "Gommunity/platform/subscriptions/infrastructure/persistence/repositories"
 	subscription_controllers "Gommunity/platform/subscriptions/interfaces/rest/controllers"
@@ -83,6 +89,7 @@ func main() {
 	roleCollection := mongoConn.GetCollection("roles")
 	communityCollection := mongoConn.GetCollection("communities")
 	subscriptionCollection := mongoConn.GetCollection("subscriptions")
+	postCollection := mongoConn.GetCollection("posts")
 
 	// Create indexes
 	indexCtx, indexCancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -95,6 +102,7 @@ func main() {
 	roleRepository := repositories.NewRoleRepository(roleCollection)
 	communityRepository := community_repositories.NewCommunityRepository(communityCollection)
 	subscriptionRepository := subscription_repositories.NewSubscriptionRepository(subscriptionCollection)
+	postRepository := posts_repositories.NewPostRepository(postCollection)
 
 	// Seed roles
 	if err := eventhandlers.SeedRoles(context.Background(), roleRepository); err != nil {
@@ -132,6 +140,7 @@ func main() {
 	// Initialize ACL facades
 	usersFacade := users_acl.NewUsersFacade(userRepository, roleRepository)
 	communitiesFacade := communities_acl.NewCommunitiesFacade(communityRepository)
+	subscriptionsFacade := subscriptions_acl.NewSubscriptionsFacade(subscriptionRepository)
 
 	// Initialize services
 	userQueryService := queryservices.NewUserQueryService(userRepository)
@@ -140,8 +149,8 @@ func main() {
 	communityCommandService := community_commandservices.NewCommunityCommandService(communityRepository)
 
 	// Initialize Subscriptions BC services
-	externalUsersService := subscription_acl.NewExternalUsersService(usersFacade)
-	externalCommunitiesService := subscription_acl.NewExternalCommunitiesService(communitiesFacade)
+	externalUsersService := subscriptions_outbound_acl.NewExternalUsersService(usersFacade)
+	externalCommunitiesService := subscriptions_outbound_acl.NewExternalCommunitiesService(communitiesFacade)
 	subscriptionCommandService := subscription_commandservices.NewSubscriptionCommandService(
 		subscriptionRepository,
 		externalUsersService,
@@ -150,6 +159,17 @@ func main() {
 	subscriptionQueryService := subscription_queryservices.NewSubscriptionQueryService(
 		subscriptionRepository,
 	)
+
+	postExternalUsersService := posts_acl.NewExternalUsersService(usersFacade)
+	postExternalCommunitiesService := posts_acl.NewExternalCommunitiesService(communitiesFacade)
+	postExternalSubscriptionsService := posts_acl.NewExternalSubscriptionsService(subscriptionsFacade)
+	postCommandService := posts_commandservices.NewPostCommandService(
+		postRepository,
+		postExternalUsersService,
+		postExternalCommunitiesService,
+		postExternalSubscriptionsService,
+	)
+	postQueryService := posts_queryservices.NewPostQueryService(postRepository)
 
 	// Initialize event handlers
 	registrationHandler := eventhandlers.NewUserRegistrationHandler(userRepository)
@@ -163,6 +183,7 @@ func main() {
 		subscriptionQueryService,
 		externalUsersService,
 	)
+	postController := posts_controllers.NewPostController(postCommandService, postQueryService)
 
 	// Initialize user role provider
 	userRoleProvider := user_services.NewUserRoleProviderService(userRepository, roleRepository)
@@ -229,10 +250,14 @@ func main() {
 		communityRoutes.POST("", communityController.CreateCommunity)
 		communityRoutes.GET("", communityController.GetAllCommunities)
 		communityRoutes.GET("/my-communities", communityController.GetMyCommunitiesAsOwner)
-		communityRoutes.GET("/:id", communityController.GetCommunityByID)
-		communityRoutes.PUT("/:id", communityController.UpdateCommunityInfo)
-		communityRoutes.DELETE("/:id", communityController.DeleteCommunity)
-		communityRoutes.PATCH("/:id/privacy", communityController.UpdateCommunityPrivacy)
+		communityRoutes.GET("/:community_id/posts", postController.GetPostsByCommunity)
+		communityRoutes.POST("/:community_id/posts", postController.CreatePost)
+		communityRoutes.GET("/:community_id/posts/:post_id", postController.GetPostByID)
+		communityRoutes.DELETE("/:community_id/posts/:post_id", postController.DeletePost)
+		communityRoutes.GET("/:community_id", communityController.GetCommunityByID)
+		communityRoutes.PUT("/:community_id", communityController.UpdateCommunityInfo)
+		communityRoutes.DELETE("/:community_id", communityController.DeleteCommunity)
+		communityRoutes.PATCH("/:community_id/privacy", communityController.UpdateCommunityPrivacy)
 	}
 
 	// Subscription routes (protected with JWT)

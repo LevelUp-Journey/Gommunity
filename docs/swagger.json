@@ -156,6 +156,290 @@
                 }
             }
         },
+        "/communities/{community_id}/posts": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves posts published inside a community.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "List posts by community",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Community ID (UUID)",
+                        "name": "community_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Limit results",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 0,
+                        "type": "integer",
+                        "description": "Skip results",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/resources.PostResource"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Members can create messages while admins or owners can also create announcements.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Publish a new post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Community ID (UUID)",
+                        "name": "community_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Post payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/resources.CreatePostResource"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/resources.PostResource"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/communities/{community_id}/posts/{post_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves a post using its identifier within a community.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Get post by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Community ID (UUID)",
+                        "name": "community_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Post ID (ObjectID)",
+                        "name": "post_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resources.PostResource"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Only community admins or owners can delete posts.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Delete a post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Community ID (UUID)",
+                        "name": "community_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Post ID (ObjectID)",
+                        "name": "post_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Post deleted"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/communities/{id}": {
             "get": {
                 "security": [
@@ -976,6 +1260,15 @@
                 }
             }
         },
+        "Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Invalid request"
+                }
+            }
+        },
         "Gommunity_platform_users_interfaces_rest_resources.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -1056,6 +1349,74 @@
                     "maxLength": 100,
                     "minLength": 3,
                     "example": "Data Science Community"
+                }
+            }
+        },
+        "resources.CreatePostResource": {
+            "type": "object",
+            "required": [
+                "content"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string",
+                    "example": "Hello community!\nThis is a markdown-enabled post."
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "message",
+                        "announcement"
+                    ],
+                    "example": "message"
+                }
+            }
+        },
+        "resources.PostResource": {
+            "type": "object",
+            "properties": {
+                "authorId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440003"
+                },
+                "communityId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440002"
+                },
+                "content": {
+                    "type": "string",
+                    "example": "Hello students!\nRemember to submit your projects."
+                },
+                "createdAt": {
+                    "type": "string",
+                    "example": "2025-01-12T12:00:00Z"
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "https://example.com/image.png"
+                    ]
+                },
+                "postId": {
+                    "type": "string",
+                    "example": "64c2f1e5b9d3a45f78901234"
+                },
+                "type": {
+                    "type": "string",
+                    "example": "message"
+                },
+                "updatedAt": {
+                    "type": "string",
+                    "example": "2025-01-12T12:05:00Z"
                 }
             }
         },

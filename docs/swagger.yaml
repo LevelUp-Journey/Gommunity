@@ -6,6 +6,12 @@ definitions:
         example: Invalid request
         type: string
     type: object
+  Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse:
+    properties:
+      error:
+        example: Invalid request
+        type: string
+    type: object
   Gommunity_platform_users_interfaces_rest_resources.ErrorResponse:
     properties:
       error:
@@ -66,6 +72,58 @@ definitions:
     required:
     - description
     - name
+    type: object
+  resources.CreatePostResource:
+    properties:
+      content:
+        example: |-
+          Hello community!
+          This is a markdown-enabled post.
+        type: string
+      images:
+        items:
+          type: string
+        type: array
+      type:
+        enum:
+        - message
+        - announcement
+        example: message
+        type: string
+    required:
+    - content
+    type: object
+  resources.PostResource:
+    properties:
+      authorId:
+        example: 550e8400-e29b-41d4-a716-446655440003
+        type: string
+      communityId:
+        example: 550e8400-e29b-41d4-a716-446655440002
+        type: string
+      content:
+        example: |-
+          Hello students!
+          Remember to submit your projects.
+        type: string
+      createdAt:
+        example: "2025-01-12T12:00:00Z"
+        type: string
+      images:
+        example:
+        - https://example.com/image.png
+        items:
+          type: string
+        type: array
+      postId:
+        example: 64c2f1e5b9d3a45f78901234
+        type: string
+      type:
+        example: message
+        type: string
+      updatedAt:
+        example: "2025-01-12T12:05:00Z"
+        type: string
     type: object
   resources.SubscribeUserResource:
     properties:
@@ -281,6 +339,192 @@ paths:
       summary: Create a new community
       tags:
       - communities
+  /communities/{community_id}/posts:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves posts published inside a community.
+      parameters:
+      - description: Community ID (UUID)
+        in: path
+        name: community_id
+        required: true
+        type: string
+      - description: Limit results
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - description: Skip results
+        in: query
+        minimum: 0
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/resources.PostResource'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List posts by community
+      tags:
+      - posts
+    post:
+      consumes:
+      - application/json
+      description: Members can create messages while admins or owners can also create
+        announcements.
+      parameters:
+      - description: Community ID (UUID)
+        in: path
+        name: community_id
+        required: true
+        type: string
+      - description: Post payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/resources.CreatePostResource'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/resources.PostResource'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Publish a new post
+      tags:
+      - posts
+  /communities/{community_id}/posts/{post_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Only community admins or owners can delete posts.
+      parameters:
+      - description: Community ID (UUID)
+        in: path
+        name: community_id
+        required: true
+        type: string
+      - description: Post ID (ObjectID)
+        in: path
+        name: post_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Post deleted
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a post
+      tags:
+      - posts
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a post using its identifier within a community.
+      parameters:
+      - description: Community ID (UUID)
+        in: path
+        name: community_id
+        required: true
+        type: string
+      - description: Post ID (ObjectID)
+        in: path
+        name: post_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resources.PostResource'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get post by ID
+      tags:
+      - posts
   /communities/{id}:
     delete:
       consumes:
