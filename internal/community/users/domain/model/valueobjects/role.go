@@ -5,13 +5,13 @@ import (
 	"strings"
 )
 
-// Predefined role IDs (UUIDs)
+// Predefined role IDs (names)
 const (
-	StudentRoleIDStr = "550e8400-e29b-41d4-a716-446655440001"
-	TeacherRoleIDStr = "550e8400-e29b-41d4-a716-446655440002"
-	AdminRoleIDStr   = "550e8400-e29b-41d4-a716-446655440003"
-	MemberRoleIDStr  = "550e8400-e29b-41d4-a716-446655440004"
-	OwnerRoleIDStr   = "550e8400-e29b-41d4-a716-446655440005"
+	StudentRoleIDStr = "student"
+	TeacherRoleIDStr = "teacher"
+	AdminRoleIDStr   = "admin"
+	MemberRoleIDStr  = "member"
+	OwnerRoleIDStr   = "owner"
 
 	// Deprecated - for backward compatibility
 	UserRoleIDStr = StudentRoleIDStr

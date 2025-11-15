@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -19,12 +18,10 @@ import (
 	"Gommunity/internal/community/users/application/eventhandlers"
 	"Gommunity/internal/community/users/application/queryservices"
 	user_services "Gommunity/internal/community/users/application/services"
-	"Gommunity/internal/community/users/domain/model/entities"
-	"Gommunity/internal/community/users/domain/model/valueobjects"
-	domain_repos "Gommunity/internal/community/users/domain/repositories"
 	"Gommunity/internal/community/users/infrastructure/messaging"
 	"Gommunity/internal/community/users/infrastructure/persistence/repositories"
 	"Gommunity/internal/community/users/interfaces/rest/controllers"
+	"Gommunity/shared/config"
 	"Gommunity/shared/infrastructure/discovery"
 	"Gommunity/shared/infrastructure/messaging/kafka"
 	"Gommunity/shared/infrastructure/middleware"
@@ -32,7 +29,6 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -47,31 +43,20 @@ import (
 // @name Authorization
 // @description Enter your JWT token directly (Bearer prefix is optional).
 func main() {
-	// Load .env file
-	err := godotenv.Load()
+	// Load configuration
+	cfg, err := config.Load()
 	if err != nil {
-		log.Println("No .env file found, using default values")
+		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	// Get configuration from environment
-	port := getEnv("PORT", "8080")
-	mongoURI := getEnv("MONGO_URI", "mongodb://localhost:27017")
-	mongoDatabase := getEnv("MONGO_DATABASE", "gommunity")
-	mongoTimeout := getEnvDuration("MONGO_TIMEOUT", 10*time.Second)
-	kafkaBootstrapServers := getEnv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
-	jwtSecret := getEnv("JWT_SECRET", "")
-	serviceDiscoveryURL := strings.TrimSuffix(getEnv("SERVICE_DISCOVERY_URL", "http://127.0.0.1:8761/eureka"), "/")
-	serverIP := getEnv("SERVER_IP", "127.0.0.1")
-	serviceName := getEnv("SERVICE_NAME", "gommunity-service")
-
 	// Set Swagger host dynamically
-	docs.SwaggerInfo.Host = "localhost:" + port
+	docs.SwaggerInfo.Host = "localhost:" + cfg.Port
 
 	// Initialize MongoDB connection
 	mongoConn, err := mongodb.NewMongoConnection(mongodb.MongoConfig{
-		URI:      mongoURI,
-		Database: mongoDatabase,
-		Timeout:  mongoTimeout,
+		URI:      cfg.MongoURI,
+		Database: cfg.MongoDatabase,
+		Timeout:  cfg.MongoTimeout,
 	})
 	if err != nil {
 		log.Fatalf("Failed to connect to MongoDB: %v", err)
@@ -101,20 +86,20 @@ func main() {
 	communityRepository := community_repositories.NewCommunityRepository(communityCollection)
 
 	// Seed roles
-	if err := seedRoles(context.Background(), roleRepository); err != nil {
+	if err := eventhandlers.SeedRoles(context.Background(), roleRepository); err != nil {
 		log.Printf("Warning: Failed to seed roles: %v", err)
 	}
 
 	// Initialize Eureka client
 	var eurekaClient *discovery.EurekaClient
 	eurekaClient, err = discovery.NewEurekaClient(discovery.EurekaConfig{
-		ServiceName:     serviceName,
-		ServerIP:        serverIP,
-		Port:            port,
-		DiscoveryURL:    serviceDiscoveryURL,
-		HealthCheckURL:  fmt.Sprintf("http://%s:%s/", serverIP, port),
-		StatusPageURL:   fmt.Sprintf("http://%s:%s/swagger/index.html", serverIP, port),
-		HomePageURL:     fmt.Sprintf("http://%s:%s/", serverIP, port),
+		ServiceName:     cfg.ServiceName,
+		ServerIP:        cfg.ServerIP,
+		Port:            cfg.Port,
+		DiscoveryURL:    cfg.ServiceDiscoveryURL,
+		HealthCheckURL:  fmt.Sprintf("http://%s:%s/", cfg.ServerIP, cfg.Port),
+		StatusPageURL:   fmt.Sprintf("http://%s:%s/swagger/index.html", cfg.ServerIP, cfg.Port),
+		HomePageURL:     fmt.Sprintf("http://%s:%s/", cfg.ServerIP, cfg.Port),
 		RenewalInterval: 30 * time.Second,
 		DurationInSecs:  90,
 	})
@@ -151,14 +136,14 @@ func main() {
 	userRoleProvider := user_services.NewUserRoleProviderService(userRepository, roleRepository)
 
 	// Initialize JWT middleware with role provider
-	jwtMiddleware := middleware.NewJWTMiddlewareWithRoleProvider(jwtSecret, userRoleProvider)
+	jwtMiddleware := middleware.NewJWTMiddlewareWithRoleProvider(cfg.JWTSecret, userRoleProvider)
 
 	// Initialize Kafka event consumer
 	kafkaEventConsumer := messaging.NewKafkaEventConsumer(registrationHandler, profileUpdateHandler)
 
 	// Initialize Kafka consumer
 	kafkaConsumer := kafka.NewKafkaConsumer(kafka.KafkaConfig{
-		BootstrapServers: kafkaBootstrapServers,
+		BootstrapServers: cfg.KafkaBootstrapServers,
 		GroupID:          "gommunity-consumer-group",
 		Topics: []string{
 			messaging.TopicCommunityRegistration,
@@ -181,11 +166,11 @@ func main() {
 
 	// Configure CORS
 	corsConfig := cors.Config{
-		AllowOrigins:     getEnvSlice("CORS_ALLOWED_ORIGINS", []string{"http://localhost:3000"}),
-		AllowMethods:     getEnvSlice("CORS_ALLOWED_METHODS", []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"}),
-		AllowHeaders:     getEnvSlice("CORS_ALLOWED_HEADERS", []string{"*"}),
-		AllowCredentials: getEnvBool("CORS_ALLOW_CREDENTIALS", true),
-		MaxAge:           getEnvDuration("CORS_MAX_AGE", 12*time.Hour),
+		AllowOrigins:     cfg.CORSAllowedOrigins,
+		AllowMethods:     cfg.CORSAllowedMethods,
+		AllowHeaders:     cfg.CORSAllowedHeaders,
+		AllowCredentials: cfg.CORSAllowCredentials,
+		MaxAge:           cfg.CORSMaxAge,
 	}
 	r.Use(cors.New(corsConfig))
 
@@ -224,9 +209,9 @@ func main() {
 
 	// Start server in a goroutine
 	go func() {
-		log.Printf("Server starting on port %s", port)
-		log.Printf("Swagger UI available at: http://localhost:%s/swagger/index.html", port)
-		if err := r.Run(":" + port); err != nil {
+		log.Printf("Server starting on port %s", cfg.Port)
+		log.Printf("Swagger UI available at: http://localhost:%s/swagger/index.html", cfg.Port)
+		if err := r.Run(":" + cfg.Port); err != nil {
 			log.Fatalf("Failed to start server: %v", err)
 		}
 	}()
@@ -246,86 +231,4 @@ func main() {
 	cancel()
 
 	log.Println("Server exited")
-}
-
-// seedRoles seeds the default roles if they don't exist
-func seedRoles(ctx context.Context, roleRepo domain_repos.RoleRepository) error {
-	roles := []struct {
-		id   string
-		name string
-	}{
-		{valueobjects.StudentRoleIDStr, "student"},
-		{valueobjects.TeacherRoleIDStr, "teacher"},
-		{valueobjects.AdminRoleIDStr, "admin"},
-		{valueobjects.MemberRoleIDStr, "member"},
-		{valueobjects.OwnerRoleIDStr, "owner"},
-	}
-
-	for _, r := range roles {
-		roleID, err := valueobjects.NewRoleID(r.id)
-		if err != nil {
-			return err
-		}
-
-		// Check if role exists
-		existing, err := roleRepo.FindByID(ctx, roleID)
-		if err != nil {
-			return err
-		}
-
-		if existing == nil {
-			// Create role
-			role, err := entities.NewRole(roleID, r.name)
-			if err != nil {
-				return err
-			}
-
-			if err := roleRepo.Save(ctx, role); err != nil {
-				return err
-			}
-
-			log.Printf("Seeded role: %s", r.name)
-		}
-	}
-
-	return nil
-}
-
-// Helper functions for environment variables
-
-func getEnv(key, defaultValue string) string {
-	value := os.Getenv(key)
-	if value == "" {
-		return defaultValue
-	}
-	return value
-}
-
-func getEnvSlice(key string, defaultValue []string) []string {
-	value := os.Getenv(key)
-	if value == "" {
-		return defaultValue
-	}
-	return strings.Split(value, ",")
-}
-
-func getEnvBool(key string, defaultValue bool) bool {
-	value := os.Getenv(key)
-	if value == "" {
-		return defaultValue
-	}
-	return value == "true"
-}
-
-func getEnvDuration(key string, defaultValue time.Duration) time.Duration {
-	value := os.Getenv(key)
-	if value == "" {
-		return defaultValue
-	}
-	duration, err := time.ParseDuration(value)
-	if err != nil {
-		log.Printf("Invalid duration for %s: %v, using default", key, err)
-		return defaultValue
-	}
-	return duration
 }

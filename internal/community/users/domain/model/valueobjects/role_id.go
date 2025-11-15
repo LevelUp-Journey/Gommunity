@@ -2,8 +2,6 @@ package valueobjects
 
 import (
 	"errors"
-
-	"github.com/google/uuid"
 )
 
 type RoleID struct {
@@ -13,11 +11,6 @@ type RoleID struct {
 func NewRoleID(value string) (RoleID, error) {
 	if value == "" {
 		return RoleID{}, errors.New("role ID cannot be empty")
-	}
-
-	// Validate UUID format
-	if _, err := uuid.Parse(value); err != nil {
-		return RoleID{}, errors.New("role ID must be a valid UUID")
 	}
 
 	return RoleID{value: value}, nil
