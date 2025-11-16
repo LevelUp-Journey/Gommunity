@@ -48,7 +48,7 @@ func NewUserController(
 // @Failure 401 {object} resources.ErrorResponse
 // @Failure 404 {object} resources.ErrorResponse
 // @Failure 500 {object} resources.ErrorResponse
-// @Router /users/{id} [get]
+// @Router /api/v1/users/{id} [get]
 func (c *UserController) GetUserByID(ctx *gin.Context) {
 	userIDParam := ctx.Param("id")
 
@@ -99,7 +99,7 @@ func (c *UserController) GetUserByID(ctx *gin.Context) {
 // @Failure 401 {object} resources.ErrorResponse
 // @Failure 404 {object} resources.ErrorResponse
 // @Failure 500 {object} resources.ErrorResponse
-// @Router /users/username/{username} [get]
+// @Router /api/v1/users/username/{username} [get]
 func (c *UserController) GetUserByUsername(ctx *gin.Context) {
 	usernameParam := ctx.Param("username")
 
@@ -152,7 +152,7 @@ func (c *UserController) GetUserByUsername(ctx *gin.Context) {
 // @Failure 403 {object} resources.ErrorResponse
 // @Failure 404 {object} resources.ErrorResponse
 // @Failure 500 {object} resources.ErrorResponse
-// @Router /users/{id}/banner [put]
+// @Router /api/v1/users/{id}/banner [put]
 func (c *UserController) UpdateBannerURL(ctx *gin.Context) {
 	userIDParam := ctx.Param("id")
 

@@ -26,6 +26,7 @@ type Config struct {
 	ServiceDiscoveryURL  string
 	ServerIP             string
 	ServiceName          string
+	APIPrefix            string
 	CORSAllowedOrigins   []string
 	CORSAllowedMethods   []string
 	CORSAllowedHeaders   []string
@@ -54,6 +55,7 @@ func Load() (*Config, error) {
 		ServiceDiscoveryURL:  strings.TrimSuffix(getEnv("SERVICE_DISCOVERY_URL", "http://127.0.0.1:8761/eureka"), "/"),
 		ServerIP:             getEnv("SERVER_IP", "127.0.0.1"),
 		ServiceName:          getEnv("SERVICE_NAME", "gommunity-service"),
+		APIPrefix:            getEnv("API_PREFIX", "/api/v1"),
 		CORSAllowedOrigins:   getEnvSlice("CORS_ALLOWED_ORIGINS", []string{"http://localhost:3000"}),
 		CORSAllowedMethods:   getEnvSlice("CORS_ALLOWED_METHODS", []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"}),
 		CORSAllowedHeaders:   getEnvSlice("CORS_ALLOWED_HEADERS", []string{"*"}),

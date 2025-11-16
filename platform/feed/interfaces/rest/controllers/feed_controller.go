@@ -35,7 +35,7 @@ func NewFeedController(queryService services.FeedQueryService) *FeedController {
 // @Failure 401 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Security BearerAuth
-// @Router /feed [get]
+// @Router /api/v1/feed [get]
 func (c *FeedController) GetUserFeed(ctx *gin.Context) {
 	// Get user ID from JWT token
 	userID, exists := ctx.Get("userID")

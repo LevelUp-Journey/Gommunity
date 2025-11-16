@@ -46,7 +46,7 @@ func NewReactionController(
 // @Failure 401 {object} resources.ErrorResponse
 // @Failure 404 {object} resources.ErrorResponse
 // @Failure 500 {object} resources.ErrorResponse
-// @Router /posts/{post_id}/reactions [post]
+// @Router /api/v1/posts/{post_id}/reactions [post]
 func (c *ReactionController) AddReaction(ctx *gin.Context) {
 	postIDValue := ctx.Param("post_id")
 
@@ -116,7 +116,7 @@ func (c *ReactionController) AddReaction(ctx *gin.Context) {
 // @Failure 401 {object} resources.ErrorResponse
 // @Failure 404 {object} resources.ErrorResponse
 // @Failure 500 {object} resources.ErrorResponse
-// @Router /posts/{post_id}/reactions [delete]
+// @Router /api/v1/posts/{post_id}/reactions [delete]
 func (c *ReactionController) RemoveReaction(ctx *gin.Context) {
 	postIDValue := ctx.Param("post_id")
 
@@ -164,7 +164,7 @@ func (c *ReactionController) RemoveReaction(ctx *gin.Context) {
 // @Failure 400 {object} resources.ErrorResponse
 // @Failure 401 {object} resources.ErrorResponse
 // @Failure 500 {object} resources.ErrorResponse
-// @Router /posts/{post_id}/reactions/count [get]
+// @Router /api/v1/posts/{post_id}/reactions/count [get]
 func (c *ReactionController) GetReactionCountByPost(ctx *gin.Context) {
 	postIDValue := ctx.Param("post_id")
 
@@ -203,7 +203,7 @@ func (c *ReactionController) GetReactionCountByPost(ctx *gin.Context) {
 // @Failure 401 {object} resources.ErrorResponse
 // @Failure 404 {object} resources.ErrorResponse
 // @Failure 500 {object} resources.ErrorResponse
-// @Router /posts/{post_id}/reactions/me [get]
+// @Router /api/v1/posts/{post_id}/reactions/me [get]
 func (c *ReactionController) GetUserReactionOnPost(ctx *gin.Context) {
 	postIDValue := ctx.Param("post_id")
 

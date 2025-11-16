@@ -48,7 +48,7 @@ func NewPostController(
 // @Failure 403 {object} resources.ErrorResponse
 // @Failure 404 {object} resources.ErrorResponse
 // @Failure 500 {object} resources.ErrorResponse
-// @Router /communities/{community_id}/posts [post]
+// @Router /api/v1/communities/{community_id}/posts [post]
 func (c *PostController) CreatePost(ctx *gin.Context) {
 	communityIDValue := ctx.Param("community_id")
 
@@ -133,7 +133,7 @@ func (c *PostController) CreatePost(ctx *gin.Context) {
 // @Failure 401 {object} resources.ErrorResponse
 // @Failure 404 {object} resources.ErrorResponse
 // @Failure 500 {object} resources.ErrorResponse
-// @Router /communities/{community_id}/posts/{post_id} [get]
+// @Router /api/v1/communities/{community_id}/posts/{post_id} [get]
 func (c *PostController) GetPostByID(ctx *gin.Context) {
 	communityIDValue := ctx.Param("community_id")
 	postIDValue := ctx.Param("post_id")
@@ -179,7 +179,7 @@ func (c *PostController) GetPostByID(ctx *gin.Context) {
 // @Failure 400 {object} resources.ErrorResponse
 // @Failure 401 {object} resources.ErrorResponse
 // @Failure 500 {object} resources.ErrorResponse
-// @Router /communities/{community_id}/posts [get]
+// @Router /api/v1/communities/{community_id}/posts [get]
 func (c *PostController) GetPostsByCommunity(ctx *gin.Context) {
 	communityIDValue := ctx.Param("community_id")
 
@@ -249,7 +249,7 @@ func (c *PostController) GetPostsByCommunity(ctx *gin.Context) {
 // @Failure 403 {object} resources.ErrorResponse
 // @Failure 404 {object} resources.ErrorResponse
 // @Failure 500 {object} resources.ErrorResponse
-// @Router /communities/{community_id}/posts/{post_id} [delete]
+// @Router /api/v1/communities/{community_id}/posts/{post_id} [delete]
 func (c *PostController) DeletePost(ctx *gin.Context) {
 	communityIDValue := ctx.Param("community_id")
 	postIDValue := ctx.Param("post_id")

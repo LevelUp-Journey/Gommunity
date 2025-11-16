@@ -44,7 +44,7 @@ func NewSubscriptionController(
 // @Failure 409 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Security BearerAuth
-// @Router /subscriptions [post]
+// @Router /api/v1/subscriptions [post]
 func (c *SubscriptionController) SubscribeUser(ctx *gin.Context) {
 	var req resources.SubscribeUserResource
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -161,7 +161,7 @@ func (c *SubscriptionController) SubscribeUser(ctx *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Security BearerAuth
-// @Router /subscriptions [delete]
+// @Router /api/v1/subscriptions [delete]
 func (c *SubscriptionController) UnsubscribeUser(ctx *gin.Context) {
 	var req resources.UnsubscribeUserResource
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -233,7 +233,7 @@ func (c *SubscriptionController) UnsubscribeUser(ctx *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Security BearerAuth
-// @Router /subscriptions/communities/{community_id}/count [get]
+// @Router /api/v1/subscriptions/communities/{community_id}/count [get]
 func (c *SubscriptionController) GetSubscriptionCount(ctx *gin.Context) {
 	communityIDStr := ctx.Param("community_id")
 
@@ -276,7 +276,7 @@ func (c *SubscriptionController) GetSubscriptionCount(ctx *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Security BearerAuth
-// @Router /subscriptions/communities/{community_id} [get]
+// @Router /api/v1/subscriptions/communities/{community_id} [get]
 func (c *SubscriptionController) GetAllSubscriptionsByCommunity(ctx *gin.Context) {
 	communityIDStr := ctx.Param("community_id")
 
@@ -336,7 +336,7 @@ func (c *SubscriptionController) GetAllSubscriptionsByCommunity(ctx *gin.Context
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Security BearerAuth
-// @Router /subscriptions/users/{user_id}/communities/{community_id} [get]
+// @Router /api/v1/subscriptions/users/{user_id}/communities/{community_id} [get]
 func (c *SubscriptionController) GetSubscriptionByUserAndCommunity(ctx *gin.Context) {
 	userIDStr := ctx.Param("user_id")
 	communityIDStr := ctx.Param("community_id")

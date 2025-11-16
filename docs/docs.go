@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/communities": {
+        "/api/v1/communities": {
             "get": {
                 "security": [
                     {
@@ -119,7 +119,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/communities/my-communities": {
+        "/api/v1/communities/my-communities": {
             "get": {
                 "security": [
                     {
@@ -162,7 +162,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/communities/{community_id}/posts": {
+        "/api/v1/communities/{community_id}/posts": {
             "get": {
                 "security": [
                     {
@@ -309,7 +309,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/communities/{community_id}/posts/{post_id}": {
+        "/api/v1/communities/{community_id}/posts/{post_id}": {
             "get": {
                 "security": [
                     {
@@ -446,7 +446,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/communities/{id}": {
+        "/api/v1/communities/{id}": {
             "get": {
                 "security": [
                     {
@@ -643,7 +643,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/communities/{id}/privacy": {
+        "/api/v1/communities/{id}/privacy": {
             "patch": {
                 "security": [
                     {
@@ -719,7 +719,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/feed": {
+        "/api/v1/feed": {
             "get": {
                 "security": [
                     {
@@ -790,7 +790,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/posts/{post_id}/reactions": {
+        "/api/v1/posts/{post_id}/reactions": {
             "post": {
                 "security": [
                     {
@@ -916,7 +916,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/posts/{post_id}/reactions/count": {
+        "/api/v1/posts/{post_id}/reactions/count": {
             "get": {
                 "security": [
                     {
@@ -971,7 +971,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/posts/{post_id}/reactions/me": {
+        "/api/v1/posts/{post_id}/reactions/me": {
             "get": {
                 "security": [
                     {
@@ -1032,7 +1032,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/subscriptions": {
+        "/api/v1/subscriptions": {
             "post": {
                 "security": [
                     {
@@ -1186,7 +1186,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/subscriptions/communities/{community_id}": {
+        "/api/v1/subscriptions/communities/{community_id}": {
             "get": {
                 "security": [
                     {
@@ -1250,7 +1250,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/subscriptions/communities/{community_id}/count": {
+        "/api/v1/subscriptions/communities/{community_id}/count": {
             "get": {
                 "security": [
                     {
@@ -1302,7 +1302,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/subscriptions/users/{user_id}/communities/{community_id}": {
+        "/api/v1/subscriptions/users/{user_id}/communities/{community_id}": {
             "get": {
                 "security": [
                     {
@@ -1370,7 +1370,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/username/{username}": {
+        "/api/v1/users/username/{username}": {
             "get": {
                 "security": [
                     {
@@ -1431,7 +1431,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/{id}": {
+        "/api/v1/users/{id}": {
             "get": {
                 "security": [
                     {
@@ -1492,7 +1492,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/{id}/banner": {
+        "/api/v1/users/{id}/banner": {
             "put": {
                 "security": [
                     {
@@ -2085,7 +2085,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost",
-	BasePath:         "/",
+	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "Gommunity API",
 	Description:      "Community management API with Kafka event processing",

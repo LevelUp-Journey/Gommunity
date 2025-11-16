@@ -1,4 +1,4 @@
-basePath: /
+basePath: /api/v1
 definitions:
   Gommunity_platform_community_interfaces_rest_resources.ErrorResponse:
     properties:
@@ -370,7 +370,7 @@ info:
   title: Gommunity API
   version: "1.0"
 paths:
-  /communities:
+  /api/v1/communities:
     get:
       consumes:
       - application/json
@@ -436,7 +436,7 @@ paths:
       summary: Create a new community
       tags:
       - communities
-  /communities/{community_id}/posts:
+  /api/v1/communities/{community_id}/posts:
     get:
       consumes:
       - application/json
@@ -533,7 +533,7 @@ paths:
       summary: Publish a new post
       tags:
       - posts
-  /communities/{community_id}/posts/{post_id}:
+  /api/v1/communities/{community_id}/posts/{post_id}:
     delete:
       consumes:
       - application/json
@@ -622,7 +622,7 @@ paths:
       summary: Get post by ID
       tags:
       - posts
-  /communities/{id}:
+  /api/v1/communities/{id}:
     delete:
       consumes:
       - application/json
@@ -750,7 +750,7 @@ paths:
       summary: Update community information
       tags:
       - communities
-  /communities/{id}/privacy:
+  /api/v1/communities/{id}/privacy:
     patch:
       consumes:
       - application/json
@@ -799,7 +799,7 @@ paths:
       summary: Update community privacy status
       tags:
       - communities
-  /communities/my-communities:
+  /api/v1/communities/my-communities:
     get:
       consumes:
       - application/json
@@ -826,7 +826,7 @@ paths:
       summary: Get my communities as owner
       tags:
       - communities
-  /feed:
+  /api/v1/feed:
     get:
       consumes:
       - application/json
@@ -873,7 +873,7 @@ paths:
       summary: Get user feed
       tags:
       - feed
-  /posts/{post_id}/reactions:
+  /api/v1/posts/{post_id}/reactions:
     delete:
       consumes:
       - application/json
@@ -955,7 +955,7 @@ paths:
       summary: Add or update a reaction to a post
       tags:
       - reactions
-  /posts/{post_id}/reactions/count:
+  /api/v1/posts/{post_id}/reactions/count:
     get:
       consumes:
       - application/json
@@ -991,7 +991,7 @@ paths:
       summary: Get reaction counts for a post
       tags:
       - reactions
-  /posts/{post_id}/reactions/me:
+  /api/v1/posts/{post_id}/reactions/me:
     get:
       consumes:
       - application/json
@@ -1030,7 +1030,7 @@ paths:
       summary: Get current user's reaction on a post
       tags:
       - reactions
-  /subscriptions:
+  /api/v1/subscriptions:
     delete:
       consumes:
       - application/json
@@ -1134,7 +1134,7 @@ paths:
       summary: Subscribe a user to a community
       tags:
       - subscriptions
-  /subscriptions/communities/{community_id}:
+  /api/v1/subscriptions/communities/{community_id}:
     get:
       description: Get all subscriptions for a specific community with optional pagination
       parameters:
@@ -1175,7 +1175,7 @@ paths:
       summary: Get all subscriptions for a community
       tags:
       - subscriptions
-  /subscriptions/communities/{community_id}/count:
+  /api/v1/subscriptions/communities/{community_id}/count:
     get:
       description: Get the total number of subscriptions for a specific community
       parameters:
@@ -1208,7 +1208,7 @@ paths:
       summary: Get subscription count for a community
       tags:
       - subscriptions
-  /subscriptions/users/{user_id}/communities/{community_id}:
+  /api/v1/subscriptions/users/{user_id}/communities/{community_id}:
     get:
       description: Get a specific subscription for a user in a community
       parameters:
@@ -1252,7 +1252,7 @@ paths:
       summary: Get subscription by user and community
       tags:
       - subscriptions
-  /users/{id}:
+  /api/v1/users/{id}:
     get:
       consumes:
       - application/json
@@ -1291,7 +1291,7 @@ paths:
       summary: Get user by ID
       tags:
       - users
-  /users/{id}/banner:
+  /api/v1/users/{id}/banner:
     put:
       consumes:
       - application/json
@@ -1340,7 +1340,7 @@ paths:
       summary: Update user banner URL
       tags:
       - users
-  /users/username/{username}:
+  /api/v1/users/username/{username}:
     get:
       consumes:
       - application/json

@@ -43,7 +43,7 @@ func NewCommunityController(
 // @Failure 401 {object} resources.ErrorResponse
 // @Failure 403 {object} resources.ErrorResponse
 // @Failure 500 {object} resources.ErrorResponse
-// @Router /communities [post]
+// @Router /api/v1/communities [post]
 func (c *CommunityController) CreateCommunity(ctx *gin.Context) {
 	// Get authenticated user ID from context
 	authenticatedUserID, err := middleware.GetUserIDFromContext(ctx)
@@ -158,7 +158,7 @@ func (c *CommunityController) CreateCommunity(ctx *gin.Context) {
 // @Failure 401 {object} resources.ErrorResponse
 // @Failure 404 {object} resources.ErrorResponse
 // @Failure 500 {object} resources.ErrorResponse
-// @Router /communities/{id} [get]
+// @Router /api/v1/communities/{id} [get]
 func (c *CommunityController) GetCommunityByID(ctx *gin.Context) {
 	communityIDParam := ctx.Param("id")
 
@@ -206,7 +206,7 @@ func (c *CommunityController) GetCommunityByID(ctx *gin.Context) {
 // @Success 200 {array} resources.CommunityResource
 // @Failure 401 {object} resources.ErrorResponse
 // @Failure 500 {object} resources.ErrorResponse
-// @Router /communities/my-communities [get]
+// @Router /api/v1/communities/my-communities [get]
 func (c *CommunityController) GetMyCommunitiesAsOwner(ctx *gin.Context) {
 	// Get authenticated user ID from context
 	authenticatedUserID, err := middleware.GetUserIDFromContext(ctx)
@@ -259,7 +259,7 @@ func (c *CommunityController) GetMyCommunitiesAsOwner(ctx *gin.Context) {
 // @Success 200 {array} resources.CommunityResource
 // @Failure 401 {object} resources.ErrorResponse
 // @Failure 500 {object} resources.ErrorResponse
-// @Router /communities [get]
+// @Router /api/v1/communities [get]
 func (c *CommunityController) GetAllCommunities(ctx *gin.Context) {
 	query := queries.NewGetAllCommunitiesQuery()
 
@@ -293,7 +293,7 @@ func (c *CommunityController) GetAllCommunities(ctx *gin.Context) {
 // @Failure 403 {object} resources.ErrorResponse
 // @Failure 404 {object} resources.ErrorResponse
 // @Failure 500 {object} resources.ErrorResponse
-// @Router /communities/{id} [delete]
+// @Router /api/v1/communities/{id} [delete]
 func (c *CommunityController) DeleteCommunity(ctx *gin.Context) {
 	communityIDParam := ctx.Param("id")
 
@@ -367,7 +367,7 @@ func (c *CommunityController) DeleteCommunity(ctx *gin.Context) {
 // @Failure 403 {object} resources.ErrorResponse
 // @Failure 404 {object} resources.ErrorResponse
 // @Failure 500 {object} resources.ErrorResponse
-// @Router /communities/{id} [put]
+// @Router /api/v1/communities/{id} [put]
 func (c *CommunityController) UpdateCommunityInfo(ctx *gin.Context) {
 	communityIDParam := ctx.Param("id")
 
@@ -503,7 +503,7 @@ func (c *CommunityController) UpdateCommunityInfo(ctx *gin.Context) {
 // @Failure 403 {object} resources.ErrorResponse
 // @Failure 404 {object} resources.ErrorResponse
 // @Failure 500 {object} resources.ErrorResponse
-// @Router /communities/{id}/privacy [patch]
+// @Router /api/v1/communities/{id}/privacy [patch]
 func (c *CommunityController) UpdateCommunityPrivacy(ctx *gin.Context) {
 	communityIDParam := ctx.Param("id")
 

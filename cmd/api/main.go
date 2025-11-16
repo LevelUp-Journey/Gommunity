@@ -63,7 +63,7 @@ import (
 // @version 1.0
 // @description Community management API with Kafka event processing
 // @host localhost
-// @BasePath /
+// @BasePath /api/v1
 // @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization
@@ -270,8 +270,11 @@ func main() {
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	// API routes with prefix
+	api := r.Group(cfg.APIPrefix)
+
 	// User routes (protected with JWT)
-	userRoutes := r.Group("/users")
+	userRoutes := api.Group("/users")
 	userRoutes.Use(jwtMiddleware.AuthMiddleware())
 	{
 		userRoutes.GET("/:id", userController.GetUserByID)
@@ -280,7 +283,7 @@ func main() {
 	}
 
 	// Community routes (protected with JWT)
-	communityRoutes := r.Group("/communities")
+	communityRoutes := api.Group("/communities")
 	communityRoutes.Use(jwtMiddleware.AuthMiddleware())
 	{
 		communityRoutes.POST("", communityController.CreateCommunity)
@@ -297,7 +300,7 @@ func main() {
 	}
 
 	// Subscription routes (protected with JWT)
-	subscriptionRoutes := r.Group("/subscriptions")
+	subscriptionRoutes := api.Group("/subscriptions")
 	subscriptionRoutes.Use(jwtMiddleware.AuthMiddleware())
 	{
 		subscriptionRoutes.POST("", subscriptionController.SubscribeUser)
@@ -308,7 +311,7 @@ func main() {
 	}
 
 	// Reaction routes (protected with JWT)
-	postRoutes := r.Group("/posts")
+	postRoutes := api.Group("/posts")
 	postRoutes.Use(jwtMiddleware.AuthMiddleware())
 	{
 		postRoutes.POST("/:post_id/reactions", reactionController.AddReaction)
@@ -318,7 +321,7 @@ func main() {
 	}
 
 	// Feed routes (protected with JWT)
-	feedRoutes := r.Group("/feed")
+	feedRoutes := api.Group("/feed")
 	feedRoutes.Use(jwtMiddleware.AuthMiddleware())
 	{
 		feedRoutes.GET("", feedController.GetUserFeed)
