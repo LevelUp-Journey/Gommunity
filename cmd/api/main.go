@@ -10,22 +10,48 @@ import (
 	"time"
 
 	"Gommunity/docs"
-	community_commandservices "Gommunity/internal/community/communities/application/commandservices"
-	community_queryservices "Gommunity/internal/community/communities/application/queryservices"
-	community_repositories "Gommunity/internal/community/communities/infrastructure/persistence/repositories"
-	community_controllers "Gommunity/internal/community/communities/interfaces/rest/controllers"
-	"Gommunity/internal/community/users/application/commandservices"
-	"Gommunity/internal/community/users/application/eventhandlers"
-	"Gommunity/internal/community/users/application/queryservices"
-	user_services "Gommunity/internal/community/users/application/services"
-	"Gommunity/internal/community/users/infrastructure/messaging"
-	"Gommunity/internal/community/users/infrastructure/persistence/repositories"
-	"Gommunity/internal/community/users/interfaces/rest/controllers"
+	community_commandservices "Gommunity/platform/community/application/commandservices"
+	community_queryservices "Gommunity/platform/community/application/queryservices"
+	community_repositories "Gommunity/platform/community/infrastructure/persistence/repositories"
+	community_controllers "Gommunity/platform/community/interfaces/rest/controllers"
+	posts_acl_impl "Gommunity/platform/posts/application/acl"
+	posts_commandservices "Gommunity/platform/posts/application/commandservices"
+	posts_acl "Gommunity/platform/posts/application/outboundservices/acl"
+	posts_queryservices "Gommunity/platform/posts/application/queryservices"
+	posts_repositories "Gommunity/platform/posts/infrastructure/persistence/repositories"
+	posts_controllers "Gommunity/platform/posts/interfaces/rest/controllers"
+	reactions_commandservices "Gommunity/platform/reactions/application/commandservices"
+	reactions_acl "Gommunity/platform/reactions/application/outboundservices/acl"
+	reactions_queryservices "Gommunity/platform/reactions/application/queryservices"
+	reactions_repositories "Gommunity/platform/reactions/infrastructure/persistence/repositories"
+	reactions_controllers "Gommunity/platform/reactions/interfaces/rest/controllers"
+	"Gommunity/platform/users/application/commandservices"
+	"Gommunity/platform/users/application/eventhandlers"
+	"Gommunity/platform/users/application/queryservices"
+	user_services "Gommunity/platform/users/application/services"
+	"Gommunity/platform/users/infrastructure/messaging"
+	"Gommunity/platform/users/infrastructure/persistence/repositories"
+	"Gommunity/platform/users/interfaces/rest/controllers"
 	"Gommunity/shared/config"
 	"Gommunity/shared/infrastructure/discovery"
 	"Gommunity/shared/infrastructure/messaging/kafka"
 	"Gommunity/shared/infrastructure/middleware"
 	"Gommunity/shared/infrastructure/persistence/mongodb"
+
+	// Subscriptions BC imports
+	communities_acl "Gommunity/platform/community/application/acl"
+	subscriptions_acl "Gommunity/platform/subscriptions/application/acl"
+	subscription_commandservices "Gommunity/platform/subscriptions/application/commandservices"
+	subscriptions_outbound_acl "Gommunity/platform/subscriptions/application/outboundservices/acl"
+	subscription_queryservices "Gommunity/platform/subscriptions/application/queryservices"
+	subscription_repositories "Gommunity/platform/subscriptions/infrastructure/persistence/repositories"
+	subscription_controllers "Gommunity/platform/subscriptions/interfaces/rest/controllers"
+	users_acl "Gommunity/platform/users/application/acl"
+
+	// Feed BC imports
+	feed_acl "Gommunity/platform/feed/application/outboundservices/acl"
+	feed_queryservices "Gommunity/platform/feed/application/queryservices"
+	feed_controllers "Gommunity/platform/feed/interfaces/rest/controllers"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -73,6 +99,9 @@ func main() {
 	userCollection := mongoConn.GetCollection("users")
 	roleCollection := mongoConn.GetCollection("roles")
 	communityCollection := mongoConn.GetCollection("communities")
+	subscriptionCollection := mongoConn.GetCollection("subscriptions")
+	postCollection := mongoConn.GetCollection("posts")
+	reactionCollection := mongoConn.GetCollection("reactions")
 
 	// Create indexes
 	indexCtx, indexCancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -84,6 +113,9 @@ func main() {
 	userRepository := repositories.NewUserRepository(userCollection)
 	roleRepository := repositories.NewRoleRepository(roleCollection)
 	communityRepository := community_repositories.NewCommunityRepository(communityCollection)
+	subscriptionRepository := subscription_repositories.NewSubscriptionRepository(subscriptionCollection)
+	postRepository := posts_repositories.NewPostRepository(postCollection)
+	reactionRepository := reactions_repositories.NewReactionRepository(reactionCollection)
 
 	// Seed roles
 	if err := eventhandlers.SeedRoles(context.Background(), roleRepository); err != nil {
@@ -118,11 +150,60 @@ func main() {
 		}
 	}
 
+	// Initialize ACL facades
+	usersFacade := users_acl.NewUsersFacade(userRepository, roleRepository)
+	communitiesFacade := communities_acl.NewCommunitiesFacade(communityRepository)
+	subscriptionsFacade := subscriptions_acl.NewSubscriptionsFacade(subscriptionRepository)
+
 	// Initialize services
 	userQueryService := queryservices.NewUserQueryService(userRepository)
 	userCommandService := commandservices.NewUserCommandService(userRepository)
 	communityQueryService := community_queryservices.NewCommunityQueryService(communityRepository)
 	communityCommandService := community_commandservices.NewCommunityCommandService(communityRepository)
+
+	// Initialize Subscriptions BC services
+	externalUsersService := subscriptions_outbound_acl.NewExternalUsersService(usersFacade)
+	externalCommunitiesService := subscriptions_outbound_acl.NewExternalCommunitiesService(communitiesFacade)
+	subscriptionCommandService := subscription_commandservices.NewSubscriptionCommandService(
+		subscriptionRepository,
+		externalUsersService,
+		externalCommunitiesService,
+	)
+	subscriptionQueryService := subscription_queryservices.NewSubscriptionQueryService(
+		subscriptionRepository,
+	)
+
+	postExternalUsersService := posts_acl.NewExternalUsersService(usersFacade)
+	postExternalCommunitiesService := posts_acl.NewExternalCommunitiesService(communitiesFacade)
+	postExternalSubscriptionsService := posts_acl.NewExternalSubscriptionsService(subscriptionsFacade)
+	postCommandService := posts_commandservices.NewPostCommandService(
+		postRepository,
+		postExternalUsersService,
+		postExternalCommunitiesService,
+		postExternalSubscriptionsService,
+	)
+	postQueryService := posts_queryservices.NewPostQueryService(postRepository)
+
+	// Initialize Posts ACL facade
+	postsFacade := posts_acl_impl.NewPostsFacade(postQueryService, postRepository)
+
+	// Initialize Reactions BC services
+	reactionsExternalPostsService := reactions_acl.NewExternalPostsService(postsFacade)
+	reactionsExternalUsersService := reactions_acl.NewExternalUsersService(usersFacade)
+	reactionCommandService := reactions_commandservices.NewReactionCommandService(
+		reactionRepository,
+		reactionsExternalPostsService,
+		reactionsExternalUsersService,
+	)
+	reactionQueryService := reactions_queryservices.NewReactionQueryService(reactionRepository)
+
+	// Initialize Feed BC services
+	feedExternalSubscriptionsService := feed_acl.NewExternalSubscriptionsService(subscriptionsFacade)
+	feedExternalPostsService := feed_acl.NewExternalPostsService(postsFacade)
+	feedQueryService := feed_queryservices.NewFeedQueryService(
+		feedExternalSubscriptionsService,
+		feedExternalPostsService,
+	)
 
 	// Initialize event handlers
 	registrationHandler := eventhandlers.NewUserRegistrationHandler(userRepository)
@@ -131,6 +212,14 @@ func main() {
 	// Initialize controllers
 	userController := controllers.NewUserController(userCommandService, userQueryService, roleRepository)
 	communityController := community_controllers.NewCommunityController(communityCommandService, communityQueryService)
+	subscriptionController := subscription_controllers.NewSubscriptionController(
+		subscriptionCommandService,
+		subscriptionQueryService,
+		externalUsersService,
+	)
+	postController := posts_controllers.NewPostController(postCommandService, postQueryService)
+	reactionController := reactions_controllers.NewReactionController(reactionCommandService, reactionQueryService)
+	feedController := feed_controllers.NewFeedController(feedQueryService)
 
 	// Initialize user role provider
 	userRoleProvider := user_services.NewUserRoleProviderService(userRepository, roleRepository)
@@ -197,10 +286,42 @@ func main() {
 		communityRoutes.POST("", communityController.CreateCommunity)
 		communityRoutes.GET("", communityController.GetAllCommunities)
 		communityRoutes.GET("/my-communities", communityController.GetMyCommunitiesAsOwner)
-		communityRoutes.GET("/:id", communityController.GetCommunityByID)
-		communityRoutes.PUT("/:id", communityController.UpdateCommunityInfo)
-		communityRoutes.DELETE("/:id", communityController.DeleteCommunity)
-		communityRoutes.PATCH("/:id/privacy", communityController.UpdateCommunityPrivacy)
+		communityRoutes.GET("/:community_id/posts", postController.GetPostsByCommunity)
+		communityRoutes.POST("/:community_id/posts", postController.CreatePost)
+		communityRoutes.GET("/:community_id/posts/:post_id", postController.GetPostByID)
+		communityRoutes.DELETE("/:community_id/posts/:post_id", postController.DeletePost)
+		communityRoutes.GET("/:community_id", communityController.GetCommunityByID)
+		communityRoutes.PUT("/:community_id", communityController.UpdateCommunityInfo)
+		communityRoutes.DELETE("/:community_id", communityController.DeleteCommunity)
+		communityRoutes.PATCH("/:community_id/privacy", communityController.UpdateCommunityPrivacy)
+	}
+
+	// Subscription routes (protected with JWT)
+	subscriptionRoutes := r.Group("/subscriptions")
+	subscriptionRoutes.Use(jwtMiddleware.AuthMiddleware())
+	{
+		subscriptionRoutes.POST("", subscriptionController.SubscribeUser)
+		subscriptionRoutes.DELETE("", subscriptionController.UnsubscribeUser)
+		subscriptionRoutes.GET("/communities/:community_id/count", subscriptionController.GetSubscriptionCount)
+		subscriptionRoutes.GET("/communities/:community_id", subscriptionController.GetAllSubscriptionsByCommunity)
+		subscriptionRoutes.GET("/users/:user_id/communities/:community_id", subscriptionController.GetSubscriptionByUserAndCommunity)
+	}
+
+	// Reaction routes (protected with JWT)
+	postRoutes := r.Group("/posts")
+	postRoutes.Use(jwtMiddleware.AuthMiddleware())
+	{
+		postRoutes.POST("/:post_id/reactions", reactionController.AddReaction)
+		postRoutes.DELETE("/:post_id/reactions", reactionController.RemoveReaction)
+		postRoutes.GET("/:post_id/reactions/count", reactionController.GetReactionCountByPost)
+		postRoutes.GET("/:post_id/reactions/me", reactionController.GetUserReactionOnPost)
+	}
+
+	// Feed routes (protected with JWT)
+	feedRoutes := r.Group("/feed")
+	feedRoutes.Use(jwtMiddleware.AuthMiddleware())
+	{
+		feedRoutes.GET("", feedController.GetUserFeed)
 	}
 
 	// Setup graceful shutdown
