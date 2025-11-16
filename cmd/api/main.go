@@ -14,11 +14,17 @@ import (
 	community_queryservices "Gommunity/platform/community/application/queryservices"
 	community_repositories "Gommunity/platform/community/infrastructure/persistence/repositories"
 	community_controllers "Gommunity/platform/community/interfaces/rest/controllers"
+	posts_acl_impl "Gommunity/platform/posts/application/acl"
 	posts_commandservices "Gommunity/platform/posts/application/commandservices"
 	posts_acl "Gommunity/platform/posts/application/outboundservices/acl"
 	posts_queryservices "Gommunity/platform/posts/application/queryservices"
 	posts_repositories "Gommunity/platform/posts/infrastructure/persistence/repositories"
 	posts_controllers "Gommunity/platform/posts/interfaces/rest/controllers"
+	reactions_commandservices "Gommunity/platform/reactions/application/commandservices"
+	reactions_acl "Gommunity/platform/reactions/application/outboundservices/acl"
+	reactions_queryservices "Gommunity/platform/reactions/application/queryservices"
+	reactions_repositories "Gommunity/platform/reactions/infrastructure/persistence/repositories"
+	reactions_controllers "Gommunity/platform/reactions/interfaces/rest/controllers"
 	"Gommunity/platform/users/application/commandservices"
 	"Gommunity/platform/users/application/eventhandlers"
 	"Gommunity/platform/users/application/queryservices"
@@ -90,6 +96,7 @@ func main() {
 	communityCollection := mongoConn.GetCollection("communities")
 	subscriptionCollection := mongoConn.GetCollection("subscriptions")
 	postCollection := mongoConn.GetCollection("posts")
+	reactionCollection := mongoConn.GetCollection("reactions")
 
 	// Create indexes
 	indexCtx, indexCancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -103,6 +110,7 @@ func main() {
 	communityRepository := community_repositories.NewCommunityRepository(communityCollection)
 	subscriptionRepository := subscription_repositories.NewSubscriptionRepository(subscriptionCollection)
 	postRepository := posts_repositories.NewPostRepository(postCollection)
+	reactionRepository := reactions_repositories.NewReactionRepository(reactionCollection)
 
 	// Seed roles
 	if err := eventhandlers.SeedRoles(context.Background(), roleRepository); err != nil {
@@ -171,6 +179,19 @@ func main() {
 	)
 	postQueryService := posts_queryservices.NewPostQueryService(postRepository)
 
+	// Initialize Posts ACL facade
+	postsFacade := posts_acl_impl.NewPostsFacade(postQueryService)
+
+	// Initialize Reactions BC services
+	reactionsExternalPostsService := reactions_acl.NewExternalPostsService(postsFacade)
+	reactionsExternalUsersService := reactions_acl.NewExternalUsersService(usersFacade)
+	reactionCommandService := reactions_commandservices.NewReactionCommandService(
+		reactionRepository,
+		reactionsExternalPostsService,
+		reactionsExternalUsersService,
+	)
+	reactionQueryService := reactions_queryservices.NewReactionQueryService(reactionRepository)
+
 	// Initialize event handlers
 	registrationHandler := eventhandlers.NewUserRegistrationHandler(userRepository)
 	profileUpdateHandler := eventhandlers.NewProfileUpdatedHandler(userRepository)
@@ -184,6 +205,7 @@ func main() {
 		externalUsersService,
 	)
 	postController := posts_controllers.NewPostController(postCommandService, postQueryService)
+	reactionController := reactions_controllers.NewReactionController(reactionCommandService, reactionQueryService)
 
 	// Initialize user role provider
 	userRoleProvider := user_services.NewUserRoleProviderService(userRepository, roleRepository)
@@ -269,6 +291,16 @@ func main() {
 		subscriptionRoutes.GET("/communities/:community_id/count", subscriptionController.GetSubscriptionCount)
 		subscriptionRoutes.GET("/communities/:community_id", subscriptionController.GetAllSubscriptionsByCommunity)
 		subscriptionRoutes.GET("/users/:user_id/communities/:community_id", subscriptionController.GetSubscriptionByUserAndCommunity)
+	}
+
+	// Reaction routes (protected with JWT)
+	postRoutes := r.Group("/posts")
+	postRoutes.Use(jwtMiddleware.AuthMiddleware())
+	{
+		postRoutes.POST("/:post_id/reactions", reactionController.AddReaction)
+		postRoutes.DELETE("/:post_id/reactions", reactionController.RemoveReaction)
+		postRoutes.GET("/:post_id/reactions/count", reactionController.GetReactionCountByPost)
+		postRoutes.GET("/:post_id/reactions/me", reactionController.GetUserReactionOnPost)
 	}
 
 	// Setup graceful shutdown

@@ -12,11 +12,32 @@ definitions:
         example: Invalid request
         type: string
     type: object
+  Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse:
+    properties:
+      error:
+        example: Invalid request
+        type: string
+    type: object
   Gommunity_platform_users_interfaces_rest_resources.ErrorResponse:
     properties:
       error:
         example: Invalid request
         type: string
+    type: object
+  resources.AddReactionResource:
+    properties:
+      reactionType:
+        enum:
+        - like
+        - love
+        - haha
+        - wow
+        - sad
+        - angry
+        example: like
+        type: string
+    required:
+    - reactionType
     type: object
   resources.CommunityResource:
     properties:
@@ -123,6 +144,45 @@ definitions:
         type: string
       updatedAt:
         example: "2025-01-12T12:05:00Z"
+        type: string
+    type: object
+  resources.ReactionCountResource:
+    properties:
+      counts:
+        additionalProperties:
+          type: integer
+        example:
+          haha: 5
+          like: 25
+          love: 10
+          wow: 2
+        type: object
+      postId:
+        example: 64c2f1e5b9d3a45f78901235
+        type: string
+      totalCount:
+        example: 42
+        type: integer
+    type: object
+  resources.ReactionResource:
+    properties:
+      createdAt:
+        example: "2025-01-12T12:00:00Z"
+        type: string
+      postId:
+        example: 64c2f1e5b9d3a45f78901235
+        type: string
+      reactionId:
+        example: 64c2f1e5b9d3a45f78901234
+        type: string
+      reactionType:
+        example: like
+        type: string
+      updatedAt:
+        example: "2025-01-12T12:05:00Z"
+        type: string
+      userId:
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
     type: object
   resources.SubscribeUserResource:
@@ -729,6 +789,163 @@ paths:
       summary: Get my communities as owner
       tags:
       - communities
+  /posts/{post_id}/reactions:
+    delete:
+      consumes:
+      - application/json
+      description: Allows a user to remove their reaction from a post.
+      parameters:
+      - description: Post ID (ObjectID)
+        in: path
+        name: post_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Reaction removed
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Remove a reaction from a post
+      tags:
+      - reactions
+    post:
+      consumes:
+      - application/json
+      description: Allows a user to add a reaction to a post. If the user already
+        reacted, the reaction type will be updated.
+      parameters:
+      - description: Post ID (ObjectID)
+        in: path
+        name: post_id
+        required: true
+        type: string
+      - description: Reaction payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/resources.AddReactionResource'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/resources.ReactionResource'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Add or update a reaction to a post
+      tags:
+      - reactions
+  /posts/{post_id}/reactions/count:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves aggregated reaction counts grouped by reaction type for
+        a specific post.
+      parameters:
+      - description: Post ID (ObjectID)
+        in: path
+        name: post_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resources.ReactionCountResource'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get reaction counts for a post
+      tags:
+      - reactions
+  /posts/{post_id}/reactions/me:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the authenticated user's reaction on a specific post.
+      parameters:
+      - description: Post ID (ObjectID)
+        in: path
+        name: post_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resources.ReactionResource'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get current user's reaction on a post
+      tags:
+      - reactions
   /subscriptions:
     delete:
       consumes:

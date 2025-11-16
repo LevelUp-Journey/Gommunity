@@ -713,6 +713,248 @@
                 }
             }
         },
+        "/posts/{post_id}/reactions": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Allows a user to add a reaction to a post. If the user already reacted, the reaction type will be updated.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reactions"
+                ],
+                "summary": "Add or update a reaction to a post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post ID (ObjectID)",
+                        "name": "post_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Reaction payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/resources.AddReactionResource"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/resources.ReactionResource"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Allows a user to remove their reaction from a post.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reactions"
+                ],
+                "summary": "Remove a reaction from a post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post ID (ObjectID)",
+                        "name": "post_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Reaction removed"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/posts/{post_id}/reactions/count": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves aggregated reaction counts grouped by reaction type for a specific post.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reactions"
+                ],
+                "summary": "Get reaction counts for a post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post ID (ObjectID)",
+                        "name": "post_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resources.ReactionCountResource"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/posts/{post_id}/reactions/me": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves the authenticated user's reaction on a specific post.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reactions"
+                ],
+                "summary": "Get current user's reaction on a post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post ID (ObjectID)",
+                        "name": "post_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resources.ReactionResource"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/subscriptions": {
             "post": {
                 "security": [
@@ -1269,12 +1511,41 @@
                 }
             }
         },
+        "Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Invalid request"
+                }
+            }
+        },
         "Gommunity_platform_users_interfaces_rest_resources.ErrorResponse": {
             "type": "object",
             "properties": {
                 "error": {
                     "type": "string",
                     "example": "Invalid request"
+                }
+            }
+        },
+        "resources.AddReactionResource": {
+            "type": "object",
+            "required": [
+                "reactionType"
+            ],
+            "properties": {
+                "reactionType": {
+                    "type": "string",
+                    "enum": [
+                        "like",
+                        "love",
+                        "haha",
+                        "wow",
+                        "sad",
+                        "angry"
+                    ],
+                    "example": "like"
                 }
             }
         },
@@ -1417,6 +1688,60 @@
                 "updatedAt": {
                     "type": "string",
                     "example": "2025-01-12T12:05:00Z"
+                }
+            }
+        },
+        "resources.ReactionCountResource": {
+            "type": "object",
+            "properties": {
+                "counts": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    },
+                    "example": {
+                        "haha": 5,
+                        "like": 25,
+                        "love": 10,
+                        "wow": 2
+                    }
+                },
+                "postId": {
+                    "type": "string",
+                    "example": "64c2f1e5b9d3a45f78901235"
+                },
+                "totalCount": {
+                    "type": "integer",
+                    "example": 42
+                }
+            }
+        },
+        "resources.ReactionResource": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string",
+                    "example": "2025-01-12T12:00:00Z"
+                },
+                "postId": {
+                    "type": "string",
+                    "example": "64c2f1e5b9d3a45f78901235"
+                },
+                "reactionId": {
+                    "type": "string",
+                    "example": "64c2f1e5b9d3a45f78901234"
+                },
+                "reactionType": {
+                    "type": "string",
+                    "example": "like"
+                },
+                "updatedAt": {
+                    "type": "string",
+                    "example": "2025-01-12T12:05:00Z"
+                },
+                "userId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 }
             }
         },
