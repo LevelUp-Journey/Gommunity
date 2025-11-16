@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"Gommunity/docs"
+	community_acl "Gommunity/platform/community/application/outboundservices/acl"
 	community_commandservices "Gommunity/platform/community/application/commandservices"
 	community_queryservices "Gommunity/platform/community/application/queryservices"
 	community_repositories "Gommunity/platform/community/infrastructure/persistence/repositories"
@@ -28,7 +29,6 @@ import (
 	"Gommunity/platform/users/application/commandservices"
 	"Gommunity/platform/users/application/eventhandlers"
 	"Gommunity/platform/users/application/queryservices"
-	user_services "Gommunity/platform/users/application/services"
 	"Gommunity/platform/users/infrastructure/messaging"
 	"Gommunity/platform/users/infrastructure/persistence/repositories"
 	"Gommunity/platform/users/interfaces/rest/controllers"
@@ -97,7 +97,6 @@ func main() {
 
 	// Initialize repositories
 	userCollection := mongoConn.GetCollection("users")
-	roleCollection := mongoConn.GetCollection("roles")
 	communityCollection := mongoConn.GetCollection("communities")
 	subscriptionCollection := mongoConn.GetCollection("subscriptions")
 	postCollection := mongoConn.GetCollection("posts")
@@ -111,16 +110,10 @@ func main() {
 	}
 
 	userRepository := repositories.NewUserRepository(userCollection)
-	roleRepository := repositories.NewRoleRepository(roleCollection)
 	communityRepository := community_repositories.NewCommunityRepository(communityCollection)
 	subscriptionRepository := subscription_repositories.NewSubscriptionRepository(subscriptionCollection)
 	postRepository := posts_repositories.NewPostRepository(postCollection)
 	reactionRepository := reactions_repositories.NewReactionRepository(reactionCollection)
-
-	// Seed roles
-	if err := eventhandlers.SeedRoles(context.Background(), roleRepository); err != nil {
-		log.Printf("Warning: Failed to seed roles: %v", err)
-	}
 
 	// Initialize Eureka client
 	var eurekaClient *discovery.EurekaClient
@@ -151,7 +144,7 @@ func main() {
 	}
 
 	// Initialize ACL facades
-	usersFacade := users_acl.NewUsersFacade(userRepository, roleRepository)
+	usersFacade := users_acl.NewUsersFacade(userRepository)
 	communitiesFacade := communities_acl.NewCommunitiesFacade(communityRepository)
 	subscriptionsFacade := subscriptions_acl.NewSubscriptionsFacade(subscriptionRepository)
 
@@ -159,7 +152,6 @@ func main() {
 	userQueryService := queryservices.NewUserQueryService(userRepository)
 	userCommandService := commandservices.NewUserCommandService(userRepository)
 	communityQueryService := community_queryservices.NewCommunityQueryService(communityRepository)
-	communityCommandService := community_commandservices.NewCommunityCommandService(communityRepository)
 
 	// Initialize Subscriptions BC services
 	externalUsersService := subscriptions_outbound_acl.NewExternalUsersService(usersFacade)
@@ -171,6 +163,15 @@ func main() {
 	)
 	subscriptionQueryService := subscription_queryservices.NewSubscriptionQueryService(
 		subscriptionRepository,
+	)
+
+	// Initialize Community BC ACL service for subscriptions
+	communityExternalSubscriptionsService := community_acl.NewExternalSubscriptionsService(subscriptionCommandService)
+
+	// Initialize Community BC command service with subscription dependency
+	communityCommandService := community_commandservices.NewCommunityCommandService(
+		communityRepository,
+		communityExternalSubscriptionsService,
 	)
 
 	postExternalUsersService := posts_acl.NewExternalUsersService(usersFacade)
@@ -210,7 +211,7 @@ func main() {
 	profileUpdateHandler := eventhandlers.NewProfileUpdatedHandler(userRepository)
 
 	// Initialize controllers
-	userController := controllers.NewUserController(userCommandService, userQueryService, roleRepository)
+	userController := controllers.NewUserController(userCommandService, userQueryService)
 	communityController := community_controllers.NewCommunityController(communityCommandService, communityQueryService)
 	subscriptionController := subscription_controllers.NewSubscriptionController(
 		subscriptionCommandService,
@@ -221,11 +222,9 @@ func main() {
 	reactionController := reactions_controllers.NewReactionController(reactionCommandService, reactionQueryService)
 	feedController := feed_controllers.NewFeedController(feedQueryService)
 
-	// Initialize user role provider
-	userRoleProvider := user_services.NewUserRoleProviderService(userRepository, roleRepository)
-
-	// Initialize JWT middleware with role provider
-	jwtMiddleware := middleware.NewJWTMiddlewareWithRoleProvider(cfg.JWTSecret, userRoleProvider)
+	// Initialize JWT middleware
+	// Note: Roles (STUDENT, TEACHER, ADMIN) come directly from IAM service via JWT
+	jwtMiddleware := middleware.NewJWTMiddleware(cfg.JWTSecret)
 
 	// Initialize Kafka event consumer
 	kafkaEventConsumer := messaging.NewKafkaEventConsumer(registrationHandler, profileUpdateHandler)

@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"context"
 	"errors"
 	"log"
 	"net/http"
@@ -11,13 +10,8 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type UserRoleProvider interface {
-	GetUserRoleByUserID(ctx context.Context, userID string) (string, error)
-}
-
 type JWTMiddleware struct {
-	secretKey    []byte
-	roleProvider UserRoleProvider
+	secretKey []byte
 }
 
 // Claims represents the JWT claims structure from IAM service
@@ -25,22 +19,14 @@ type Claims struct {
 	UserID    string   `json:"userId"`
 	Email     string   `json:"email"`
 	Username  string   `json:"username"`
-	Roles     []string `json:"roles"` // Array of roles from IAM: ["TEACHER", "ADMIN"]
+	Roles     []string `json:"roles"` // Array of roles from IAM: ["STUDENT", "TEACHER", "ADMIN"]
 	ProfileID string   `json:"profileId"`
 	jwt.RegisteredClaims
 }
 
 func NewJWTMiddleware(secretKey string) *JWTMiddleware {
 	return &JWTMiddleware{
-		secretKey:    []byte(secretKey),
-		roleProvider: nil,
-	}
-}
-
-func NewJWTMiddlewareWithRoleProvider(secretKey string, roleProvider UserRoleProvider) *JWTMiddleware {
-	return &JWTMiddleware{
-		secretKey:    []byte(secretKey),
-		roleProvider: roleProvider,
+		secretKey: []byte(secretKey),
 	}
 }
 
@@ -76,23 +62,14 @@ func (jm *JWTMiddleware) AuthMiddleware() gin.HandlerFunc {
 		c.Set("profileID", claims.ProfileID)
 
 		// Get primary role from JWT roles array
-		// IAM sends roles as ["TEACHER", "ADMIN"], we need to extract the primary one
+		// IAM sends roles as ["STUDENT"], ["TEACHER"], or ["ADMIN"]
+		// These roles come from the IAM service and are NOT stored in our database
 		var role string
 		if len(claims.Roles) > 0 {
 			// Use first role and add ROLE_ prefix if not present
 			role = claims.Roles[0]
 			if !strings.HasPrefix(role, "ROLE_") {
 				role = "ROLE_" + role
-			}
-		}
-
-		// If no role in JWT and provider is available, fetch from database
-		if role == "" && jm.roleProvider != nil {
-			fetchedRole, err := jm.roleProvider.GetUserRoleByUserID(c.Request.Context(), claims.UserID)
-			if err != nil {
-				log.Printf("Failed to fetch role for user %s: %v", claims.UserID, err)
-			} else {
-				role = fetchedRole
 			}
 		}
 

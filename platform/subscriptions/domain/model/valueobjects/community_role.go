@@ -6,8 +6,8 @@ import (
 )
 
 // Predefined role names for Community context
-// Note: student and teacher roles exist only for JWT validation/mapping
-// The actual application roles are: member, admin, owner
+// Note: These are community-specific roles (different from IAM roles: STUDENT, TEACHER, ADMIN)
+// Community roles are scoped per community - a user can have different roles in different communities
 const (
 	MemberRoleName = "member"
 	AdminRoleName  = "admin"

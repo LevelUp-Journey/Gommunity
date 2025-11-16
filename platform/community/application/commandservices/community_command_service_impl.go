@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 
+	"Gommunity/platform/community/application/outboundservices/acl"
 	"Gommunity/platform/community/domain/model/commands"
 	"Gommunity/platform/community/domain/model/entities"
 	"Gommunity/platform/community/domain/model/valueobjects"
@@ -13,15 +14,17 @@ import (
 )
 
 type communityCommandServiceImpl struct {
-	communityRepo repositories.CommunityRepository
-	// TODO: Add ACL service to update user role when we integrate with users context
+	communityRepo                repositories.CommunityRepository
+	externalSubscriptionsService *acl.ExternalSubscriptionsService
 }
 
 func NewCommunityCommandService(
 	communityRepo repositories.CommunityRepository,
+	externalSubscriptionsService *acl.ExternalSubscriptionsService,
 ) services.CommunityCommandService {
 	return &communityCommandServiceImpl{
-		communityRepo: communityRepo,
+		communityRepo:                communityRepo,
+		externalSubscriptionsService: externalSubscriptionsService,
 	}
 }
 
@@ -48,9 +51,15 @@ func (s *communityCommandServiceImpl) HandleCreate(ctx context.Context, cmd comm
 		return nil, err
 	}
 
-	// TODO: Publish CommunityCreatedEvent to update user role from ROLE_TEACHER to ROLE_OWNER
-	// This will be done via Kafka event publishing
-	// Event should contain: communityID, ownerID, name
+	// Automatically create subscription with 'owner' role for the community creator
+	// This replaces the old TODO about publishing events to update user roles
+	if err := s.externalSubscriptionsService.CreateOwnerSubscription(ctx, cmd.OwnerID().Value(), community.CommunityID()); err != nil {
+		log.Printf("Warning: Failed to create owner subscription for community %s: %v", community.CommunityID().Value(), err)
+		// Note: We don't fail the community creation if subscription fails
+		// The community is already created, we just log the error
+	} else {
+		log.Printf("Owner subscription created successfully for user %s in community %s", cmd.OwnerID().Value(), community.CommunityID().Value())
+	}
 
 	log.Printf("Community created successfully: %s", community.CommunityID().Value())
 

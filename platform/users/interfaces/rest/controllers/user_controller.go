@@ -1,15 +1,12 @@
 package controllers
 
 import (
-	"context"
-	"log"
 	"net/http"
 
 	"Gommunity/platform/users/domain/model/commands"
 	"Gommunity/platform/users/domain/model/entities"
 	"Gommunity/platform/users/domain/model/queries"
 	"Gommunity/platform/users/domain/model/valueobjects"
-	"Gommunity/platform/users/domain/repositories"
 	"Gommunity/platform/users/domain/services"
 	"Gommunity/platform/users/interfaces/rest/resources"
 	"Gommunity/shared/infrastructure/middleware"
@@ -20,18 +17,15 @@ import (
 type UserController struct {
 	commandService services.UserCommandService
 	queryService   services.UserQueryService
-	roleRepository repositories.RoleRepository
 }
 
 func NewUserController(
 	commandService services.UserCommandService,
 	queryService services.UserQueryService,
-	roleRepository repositories.RoleRepository,
 ) *UserController {
 	return &UserController{
 		commandService: commandService,
 		queryService:   queryService,
-		roleRepository: roleRepository,
 	}
 }
 
@@ -189,13 +183,7 @@ func (c *UserController) UpdateBannerURL(ctx *gin.Context) {
 		return
 	}
 
-	cmd, err := commands.NewUpdateBannerURLCommand(userID, req.BannerURL)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, resources.ErrorResponse{
-			Error: err.Error(),
-		})
-		return
-	}
+	cmd := commands.NewUpdateBannerURLCommand(userID, req.BannerURL)
 
 	if err := c.commandService.HandleUpdateBanner(ctx.Request.Context(), cmd); err != nil {
 		if err.Error() == "user not found" {
@@ -224,22 +212,14 @@ func (c *UserController) UpdateBannerURL(ctx *gin.Context) {
 }
 
 func (c *UserController) transformUserToResource(user *entities.User) resources.UserResource {
-	// Get role name from role repository
-	roleName := "unknown"
-	ctx := context.Background()
-	role, err := c.roleRepository.FindByID(ctx, user.RoleID())
-	if err == nil && role != nil {
-		roleName = role.Name()
-	} else {
-		log.Printf("Warning: Failed to retrieve role name for role ID %s: %v", user.RoleID().Value(), err)
-	}
-
+	// Note: Users BC no longer manages roles
+	// Roles are managed per-community in Subscriptions BC
+	// IAM roles (STUDENT, TEACHER, ADMIN) come from JWT token
 	return resources.UserResource{
 		ID:         user.ID(),
 		UserID:     user.UserID().Value(),
 		ProfileID:  user.ProfileID().Value(),
 		Username:   user.Username().Value(),
-		Role:       roleName,
 		ProfileURL: user.ProfileURL(),
 		BannerURL:  user.BannerURL(),
 		UpdatedAt:  user.UpdatedAt(),
