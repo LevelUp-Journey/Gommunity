@@ -59,3 +59,23 @@ func (f *subscriptionsFacadeImpl) IsUserSubscribed(ctx context.Context, userID s
 
 	return f.subscriptionRepository.ExistsByUserAndCommunity(ctx, userIDVO, communityIDVO)
 }
+
+// GetUserCommunityIDs retrieves all community IDs that a user is subscribed to
+func (f *subscriptionsFacadeImpl) GetUserCommunityIDs(ctx context.Context, userID string) ([]string, error) {
+	userIDVO, err := valueobjects.NewUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	subscriptions, err := f.subscriptionRepository.FindAllByUserID(ctx, userIDVO)
+	if err != nil {
+		return nil, err
+	}
+
+	communityIDs := make([]string, len(subscriptions))
+	for i, sub := range subscriptions {
+		communityIDs[i] = sub.CommunityID().Value()
+	}
+
+	return communityIDs, nil
+}

@@ -104,6 +104,57 @@ func (r *postRepositoryImpl) FindByCommunity(ctx context.Context, communityID va
 	return posts, nil
 }
 
+// FindByCommunities retrieves posts from multiple communities, optionally filtered by post type
+func (r *postRepositoryImpl) FindByCommunities(ctx context.Context, communityIDs []valueobjects.CommunityID, postType *valueobjects.PostType, limit, offset *int) ([]*entities.Post, error) {
+	// Convert community IDs to strings
+	communityIDStrings := make([]string, len(communityIDs))
+	for i, id := range communityIDs {
+		communityIDStrings[i] = id.Value()
+	}
+
+	// Build filter
+	filter := bson.M{"community_id": bson.M{"$in": communityIDStrings}}
+
+	// Add post type filter if provided
+	if postType != nil {
+		filter["post_type"] = postType.Value()
+	}
+
+	findOptions := options.Find().SetSort(bson.D{{Key: "created_at", Value: -1}})
+	if limit != nil {
+		findOptions.SetLimit(int64(*limit))
+	}
+	if offset != nil {
+		findOptions.SetSkip(int64(*offset))
+	}
+
+	cursor, err := r.collection.Find(ctx, filter, findOptions)
+	if err != nil {
+		log.Printf("failed to find posts by communities: %v", err)
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var posts []*entities.Post
+	for cursor.Next(ctx) {
+		var doc postDocument
+		if err := cursor.Decode(&doc); err != nil {
+			return nil, err
+		}
+		entity, err := r.documentToEntity(&doc)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, entity)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	return posts, nil
+}
+
 // FindByAuthorAndCommunity retrieves a publication constraint for a user.
 func (r *postRepositoryImpl) FindByAuthorAndCommunity(ctx context.Context, authorID valueobjects.AuthorID, communityID valueobjects.CommunityID) (*entities.Post, error) {
 	filter := bson.M{

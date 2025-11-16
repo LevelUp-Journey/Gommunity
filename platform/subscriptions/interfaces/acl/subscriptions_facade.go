@@ -10,4 +10,7 @@ type SubscriptionsFacade interface {
 
 	// IsUserSubscribed indicates whether the user belongs to the community.
 	IsUserSubscribed(ctx context.Context, userID string, communityID string) (bool, error)
+
+	// GetUserCommunityIDs retrieves all community IDs that a user is subscribed to
+	GetUserCommunityIDs(ctx context.Context, userID string) ([]string, error)
 }

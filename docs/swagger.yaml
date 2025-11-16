@@ -117,6 +117,40 @@ definitions:
     required:
     - content
     type: object
+  resources.FeedItemResource:
+    properties:
+      authorId:
+        example: user123
+        type: string
+      communityId:
+        example: 507f1f77bcf86cd799439012
+        type: string
+      content:
+        example: This is an important announcement
+        type: string
+      createdAt:
+        example: "2023-01-01T00:00:00Z"
+        type: string
+      messageType:
+        example: announcement
+        type: string
+      postId:
+        example: 507f1f77bcf86cd799439011
+        type: string
+      updatedAt:
+        example: "2023-01-01T00:00:00Z"
+        type: string
+    type: object
+  resources.FeedResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/resources.FeedItemResource'
+        type: array
+      total:
+        example: 10
+        type: integer
+    type: object
   resources.PostResource:
     properties:
       authorId:
@@ -792,6 +826,53 @@ paths:
       summary: Get my communities as owner
       tags:
       - communities
+  /feed:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves announcements from all communities the user is subscribed
+        to
+      parameters:
+      - default: 20
+        description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Page offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resources.FeedResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user feed
+      tags:
+      - feed
   /posts/{post_id}/reactions:
     delete:
       consumes:

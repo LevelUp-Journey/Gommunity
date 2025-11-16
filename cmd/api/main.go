@@ -48,6 +48,11 @@ import (
 	subscription_controllers "Gommunity/platform/subscriptions/interfaces/rest/controllers"
 	users_acl "Gommunity/platform/users/application/acl"
 
+	// Feed BC imports
+	feed_acl "Gommunity/platform/feed/application/outboundservices/acl"
+	feed_queryservices "Gommunity/platform/feed/application/queryservices"
+	feed_controllers "Gommunity/platform/feed/interfaces/rest/controllers"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -180,7 +185,7 @@ func main() {
 	postQueryService := posts_queryservices.NewPostQueryService(postRepository)
 
 	// Initialize Posts ACL facade
-	postsFacade := posts_acl_impl.NewPostsFacade(postQueryService)
+	postsFacade := posts_acl_impl.NewPostsFacade(postQueryService, postRepository)
 
 	// Initialize Reactions BC services
 	reactionsExternalPostsService := reactions_acl.NewExternalPostsService(postsFacade)
@@ -191,6 +196,14 @@ func main() {
 		reactionsExternalUsersService,
 	)
 	reactionQueryService := reactions_queryservices.NewReactionQueryService(reactionRepository)
+
+	// Initialize Feed BC services
+	feedExternalSubscriptionsService := feed_acl.NewExternalSubscriptionsService(subscriptionsFacade)
+	feedExternalPostsService := feed_acl.NewExternalPostsService(postsFacade)
+	feedQueryService := feed_queryservices.NewFeedQueryService(
+		feedExternalSubscriptionsService,
+		feedExternalPostsService,
+	)
 
 	// Initialize event handlers
 	registrationHandler := eventhandlers.NewUserRegistrationHandler(userRepository)
@@ -206,6 +219,7 @@ func main() {
 	)
 	postController := posts_controllers.NewPostController(postCommandService, postQueryService)
 	reactionController := reactions_controllers.NewReactionController(reactionCommandService, reactionQueryService)
+	feedController := feed_controllers.NewFeedController(feedQueryService)
 
 	// Initialize user role provider
 	userRoleProvider := user_services.NewUserRoleProviderService(userRepository, roleRepository)
@@ -301,6 +315,13 @@ func main() {
 		postRoutes.DELETE("/:post_id/reactions", reactionController.RemoveReaction)
 		postRoutes.GET("/:post_id/reactions/count", reactionController.GetReactionCountByPost)
 		postRoutes.GET("/:post_id/reactions/me", reactionController.GetUserReactionOnPost)
+	}
+
+	// Feed routes (protected with JWT)
+	feedRoutes := r.Group("/feed")
+	feedRoutes.Use(jwtMiddleware.AuthMiddleware())
+	{
+		feedRoutes.GET("", feedController.GetUserFeed)
 	}
 
 	// Setup graceful shutdown
