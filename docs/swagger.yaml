@@ -85,6 +85,9 @@ definitions:
       iconUrl:
         example: https://example.com/icon.jpg
         type: string
+      isPrivate:
+        example: false
+        type: boolean
       name:
         example: Data Science Community
         maxLength: 100

@@ -12,6 +12,7 @@ type CreateCommunityCommand struct {
 	description valueobjects.Description
 	iconURL     *string
 	bannerURL   *string
+	isPrivate   bool
 }
 
 func NewCreateCommunityCommand(
@@ -20,6 +21,7 @@ func NewCreateCommunityCommand(
 	description valueobjects.Description,
 	iconURL *string,
 	bannerURL *string,
+	isPrivate bool,
 ) (CreateCommunityCommand, error) {
 	if ownerID.IsZero() {
 		return CreateCommunityCommand{}, errors.New("ownerID cannot be empty")
@@ -39,6 +41,7 @@ func NewCreateCommunityCommand(
 		description: description,
 		iconURL:     iconURL,
 		bannerURL:   bannerURL,
+		isPrivate:   isPrivate,
 	}, nil
 }
 
@@ -60,4 +63,8 @@ func (c CreateCommunityCommand) IconURL() *string {
 
 func (c CreateCommunityCommand) BannerURL() *string {
 	return c.bannerURL
+}
+
+func (c CreateCommunityCommand) IsPrivate() bool {
+	return c.isPrivate
 }

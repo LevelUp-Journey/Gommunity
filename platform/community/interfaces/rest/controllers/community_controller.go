@@ -107,8 +107,14 @@ func (c *CommunityController) CreateCommunity(ctx *gin.Context) {
 		return
 	}
 
+	// Determine privacy: default to public (false) if not specified
+	isPrivate := false
+	if req.IsPrivate != nil {
+		isPrivate = *req.IsPrivate
+	}
+
 	// Create command
-	cmd, err := commands.NewCreateCommunityCommand(ownerID, name, description, req.IconURL, req.BannerURL)
+	cmd, err := commands.NewCreateCommunityCommand(ownerID, name, description, req.IconURL, req.BannerURL, isPrivate)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, resources.ErrorResponse{
 			Error: err.Error(),

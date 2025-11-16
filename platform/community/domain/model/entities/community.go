@@ -28,6 +28,7 @@ func NewCommunity(
 	description valueobjects.Description,
 	iconURL *string,
 	bannerURL *string,
+	isPrivate bool,
 ) (*Community, error) {
 	now := time.Now()
 	communityID := uuid.New().String()
@@ -45,7 +46,7 @@ func NewCommunity(
 		description: description,
 		iconURL:     iconURL,
 		bannerURL:   bannerURL,
-		isPrivate:   false,
+		isPrivate:   isPrivate,
 		createdAt:   now,
 		updatedAt:   now,
 	}, nil

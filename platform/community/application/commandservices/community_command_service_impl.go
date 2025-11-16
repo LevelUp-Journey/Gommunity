@@ -35,6 +35,7 @@ func (s *communityCommandServiceImpl) HandleCreate(ctx context.Context, cmd comm
 		cmd.Description(),
 		cmd.IconURL(),
 		cmd.BannerURL(),
+		cmd.IsPrivate(),
 	)
 	if err != nil {
 		log.Printf("Error creating community entity: %v", err)

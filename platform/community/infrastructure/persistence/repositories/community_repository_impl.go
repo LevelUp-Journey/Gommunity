@@ -235,13 +235,9 @@ func (r *communityRepositoryImpl) documentToEntity(doc *communityDocument) (*ent
 		return nil, err
 	}
 
-	community, err := entities.NewCommunity(ownerID, name, description, doc.IconURL, doc.BannerURL)
+	community, err := entities.NewCommunity(ownerID, name, description, doc.IconURL, doc.BannerURL, doc.IsPrivate)
 	if err != nil {
 		return nil, err
-	}
-
-	if doc.IsPrivate {
-		community.MakePrivate()
 	}
 
 	return community, nil

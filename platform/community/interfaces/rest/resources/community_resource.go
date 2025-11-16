@@ -22,6 +22,7 @@ type CreateCommunityResource struct {
 	Description string  `json:"description" binding:"required,min=10,max=500" example:"A community for data science enthusiasts to share knowledge and collaborate"`
 	IconURL     *string `json:"iconUrl,omitempty" binding:"omitempty,url" example:"https://example.com/icon.jpg"`
 	BannerURL   *string `json:"bannerUrl,omitempty" binding:"omitempty,url" example:"https://example.com/banner.jpg"`
+	IsPrivate   *bool   `json:"isPrivate,omitempty" example:"false"`
 }
 
 // UpdateCommunityResource represents the request to update community information

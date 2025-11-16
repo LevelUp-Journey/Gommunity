@@ -1621,6 +1621,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "https://example.com/icon.jpg"
                 },
+                "isPrivate": {
+                    "type": "boolean",
+                    "example": false
+                },
                 "name": {
                     "type": "string",
                     "maxLength": 100,
