@@ -63,7 +63,7 @@ import (
 // @version 1.0
 // @description Community management API with Kafka event processing
 // @host localhost
-// @BasePath /api/v1
+// @BasePath /
 // @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization

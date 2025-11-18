@@ -152,15 +152,15 @@ func (c *CommunityController) CreateCommunity(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param id path string true "Community ID (UUID)"
+// @Param community_id path string true "Community ID (UUID)"
 // @Success 200 {object} resources.CommunityResource
 // @Failure 400 {object} resources.ErrorResponse
 // @Failure 401 {object} resources.ErrorResponse
 // @Failure 404 {object} resources.ErrorResponse
 // @Failure 500 {object} resources.ErrorResponse
-// @Router /api/v1/communities/{id} [get]
+// @Router /api/v1/communities/{community_id} [get]
 func (c *CommunityController) GetCommunityByID(ctx *gin.Context) {
-	communityIDParam := ctx.Param("id")
+	communityIDParam := ctx.Param("community_id")
 
 	communityID, err := valueobjects.NewCommunityID(communityIDParam)
 	if err != nil {
@@ -286,16 +286,16 @@ func (c *CommunityController) GetAllCommunities(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param id path string true "Community ID (UUID)"
+// @Param community_id path string true "Community ID (UUID)"
 // @Success 204
 // @Failure 400 {object} resources.ErrorResponse
 // @Failure 401 {object} resources.ErrorResponse
 // @Failure 403 {object} resources.ErrorResponse
 // @Failure 404 {object} resources.ErrorResponse
 // @Failure 500 {object} resources.ErrorResponse
-// @Router /api/v1/communities/{id} [delete]
+// @Router /api/v1/communities/{community_id} [delete]
 func (c *CommunityController) DeleteCommunity(ctx *gin.Context) {
-	communityIDParam := ctx.Param("id")
+	communityIDParam := ctx.Param("community_id")
 
 	// Get authenticated user ID from context
 	authenticatedUserID, err := middleware.GetUserIDFromContext(ctx)
@@ -359,7 +359,7 @@ func (c *CommunityController) DeleteCommunity(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param id path string true "Community ID (UUID)"
+// @Param community_id path string true "Community ID (UUID)"
 // @Param request body resources.UpdateCommunityResource true "Community update request"
 // @Success 200 {object} resources.CommunityResource
 // @Failure 400 {object} resources.ErrorResponse
@@ -367,9 +367,9 @@ func (c *CommunityController) DeleteCommunity(ctx *gin.Context) {
 // @Failure 403 {object} resources.ErrorResponse
 // @Failure 404 {object} resources.ErrorResponse
 // @Failure 500 {object} resources.ErrorResponse
-// @Router /api/v1/communities/{id} [put]
+// @Router /api/v1/communities/{community_id} [put]
 func (c *CommunityController) UpdateCommunityInfo(ctx *gin.Context) {
-	communityIDParam := ctx.Param("id")
+	communityIDParam := ctx.Param("community_id")
 
 	// Get authenticated user ID from context
 	authenticatedUserID, err := middleware.GetUserIDFromContext(ctx)
@@ -495,7 +495,7 @@ func (c *CommunityController) UpdateCommunityInfo(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param id path string true "Community ID (UUID)"
+// @Param community_id path string true "Community ID (UUID)"
 // @Param request body resources.UpdateCommunityPrivacyResource true "Community privacy update request"
 // @Success 200 {object} resources.CommunityResource
 // @Failure 400 {object} resources.ErrorResponse
@@ -503,9 +503,9 @@ func (c *CommunityController) UpdateCommunityInfo(ctx *gin.Context) {
 // @Failure 403 {object} resources.ErrorResponse
 // @Failure 404 {object} resources.ErrorResponse
 // @Failure 500 {object} resources.ErrorResponse
-// @Router /api/v1/communities/{id}/privacy [patch]
+// @Router /api/v1/communities/{community_id}/privacy [patch]
 func (c *CommunityController) UpdateCommunityPrivacy(ctx *gin.Context) {
-	communityIDParam := ctx.Param("id")
+	communityIDParam := ctx.Param("community_id")
 
 	// Get authenticated user ID from context
 	authenticatedUserID, err := middleware.GetUserIDFromContext(ctx)
