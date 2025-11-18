@@ -363,7 +363,6 @@ definitions:
         example: johndoe
         type: string
     type: object
-host: localhost
 info:
   contact: {}
   description: Community management API with Kafka event processing

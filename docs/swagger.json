@@ -6,7 +6,6 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost",
     "basePath": "/",
     "paths": {
         "/api/v1/communities": {

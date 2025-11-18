@@ -62,7 +62,6 @@ import (
 // @title Gommunity API
 // @version 1.0
 // @description Community management API with Kafka event processing
-// @host localhost
 // @BasePath /
 // @securityDefinitions.apikey BearerAuth
 // @in header
@@ -75,8 +74,9 @@ func main() {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	// Set Swagger host dynamically
-	docs.SwaggerInfo.Host = "localhost:" + cfg.Port
+	// Set Swagger host dynamically but without hardcoding the hostname
+	// This will use the hostname from the request
+	docs.SwaggerInfo.Host = ""  // Empty = use current request host
 
 	// Initialize MongoDB connection
 	mongoConn, err := mongodb.NewMongoConnection(mongodb.MongoConfig{
@@ -254,12 +254,20 @@ func main() {
 
 	// Configure CORS
 	corsConfig := cors.Config{
-		AllowOrigins:     cfg.CORSAllowedOrigins,
 		AllowMethods:     cfg.CORSAllowedMethods,
 		AllowHeaders:     cfg.CORSAllowedHeaders,
 		AllowCredentials: cfg.CORSAllowCredentials,
 		MaxAge:           cfg.CORSMaxAge,
 	}
+
+	// Handle AllowOrigins - if "*", use AllowAllOrigins instead
+	if len(cfg.CORSAllowedOrigins) == 1 && cfg.CORSAllowedOrigins[0] == "*" {
+		corsConfig.AllowAllOrigins = true
+		corsConfig.AllowCredentials = false // Can't use credentials with AllowAllOrigins
+	} else {
+		corsConfig.AllowOrigins = cfg.CORSAllowedOrigins
+	}
+
 	r.Use(cors.New(corsConfig))
 
 	// Routes
