@@ -2,8 +2,6 @@ package commands
 
 import (
 	"Gommunity/platform/users/domain/model/valueobjects"
-	"errors"
-	"net/url"
 )
 
 type UpdateBannerURLCommand struct {
@@ -11,30 +9,11 @@ type UpdateBannerURLCommand struct {
 	bannerURL string
 }
 
-func NewUpdateBannerURLCommand(userID valueobjects.UserID, bannerURL string) (UpdateBannerURLCommand, error) {
-	if userID.IsZero() {
-		return UpdateBannerURLCommand{}, errors.New("userID cannot be empty")
-	}
-
-	if bannerURL == "" {
-		return UpdateBannerURLCommand{}, errors.New("bannerURL cannot be empty")
-	}
-
-	// Validate URL format
-	parsedURL, err := url.ParseRequestURI(bannerURL)
-	if err != nil {
-		return UpdateBannerURLCommand{}, errors.New("bannerURL must be a valid URL")
-	}
-
-	// Validate URL scheme (must be http or https)
-	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
-		return UpdateBannerURLCommand{}, errors.New("bannerURL must use http or https scheme")
-	}
-
+func NewUpdateBannerURLCommand(userID valueobjects.UserID, bannerURL string) UpdateBannerURLCommand {
 	return UpdateBannerURLCommand{
 		userID:    userID,
 		bannerURL: bannerURL,
-	}, nil
+	}
 }
 
 func (c UpdateBannerURLCommand) UserID() valueobjects.UserID {

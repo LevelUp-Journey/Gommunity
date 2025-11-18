@@ -11,17 +11,14 @@ import (
 
 type usersFacadeImpl struct {
 	userRepository repositories.UserRepository
-	roleRepository repositories.RoleRepository
 }
 
 // NewUsersFacade creates a new UsersFacade implementation
 func NewUsersFacade(
 	userRepository repositories.UserRepository,
-	roleRepository repositories.RoleRepository,
 ) acl.UsersFacade {
 	return &usersFacadeImpl{
 		userRepository: userRepository,
-		roleRepository: roleRepository,
 	}
 }
 
@@ -55,13 +52,13 @@ func (f *usersFacadeImpl) ValidateUserExists(ctx context.Context, userID string)
 }
 
 // ValidateRoleExists checks if a role exists by name
+// Note: Users BC no longer manages roles. Roles are managed per-community in Subscriptions BC.
+// This method always returns true as role validation is not needed at this level.
 func (f *usersFacadeImpl) ValidateRoleExists(ctx context.Context, roleName string) (bool, error) {
-	role, err := f.roleRepository.FindByName(ctx, roleName)
-	if err != nil {
-		return false, err
-	}
-
-	return role != nil, nil
+	// Users BC doesn't manage roles anymore
+	// Role validation happens in Subscriptions BC for community-specific roles
+	// IAM roles (STUDENT, TEACHER, ADMIN) come from JWT and don't need validation
+	return true, nil
 }
 
 // GetUserRoleInCommunity retrieves the user's role in a specific community

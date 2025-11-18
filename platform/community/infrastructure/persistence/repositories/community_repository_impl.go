@@ -26,8 +26,7 @@ func NewCommunityRepository(collection *mongo.Collection) domain_repos.Community
 
 // communityDocument represents the MongoDB document structure
 type communityDocument struct {
-	ID          string  `bson:"_id"`
-	CommunityID string  `bson:"community_id"`
+	CommunityID string  `bson:"_id"`
 	OwnerID     string  `bson:"owner_id"`
 	Name        string  `bson:"name"`
 	Description string  `bson:"description"`
@@ -57,7 +56,7 @@ func (r *communityRepositoryImpl) Save(ctx context.Context, community *entities.
 
 // Update updates an existing community in the database
 func (r *communityRepositoryImpl) Update(ctx context.Context, community *entities.Community) error {
-	filter := bson.M{"community_id": community.CommunityID().Value()}
+	filter := bson.M{"_id": community.CommunityID().Value()}
 
 	update := bson.M{
 		"$set": bson.M{
@@ -86,7 +85,7 @@ func (r *communityRepositoryImpl) Update(ctx context.Context, community *entitie
 
 // FindByID finds a community by community ID
 func (r *communityRepositoryImpl) FindByID(ctx context.Context, communityID valueobjects.CommunityID) (*entities.Community, error) {
-	filter := bson.M{"community_id": communityID.Value()}
+	filter := bson.M{"_id": communityID.Value()}
 
 	var doc communityDocument
 	err := r.collection.FindOne(ctx, filter).Decode(&doc)
@@ -173,7 +172,7 @@ func (r *communityRepositoryImpl) FindAll(ctx context.Context) ([]*entities.Comm
 
 // Delete deletes a community by community ID
 func (r *communityRepositoryImpl) Delete(ctx context.Context, communityID valueobjects.CommunityID) error {
-	filter := bson.M{"community_id": communityID.Value()}
+	filter := bson.M{"_id": communityID.Value()}
 
 	result, err := r.collection.DeleteOne(ctx, filter)
 	if err != nil {
@@ -191,7 +190,7 @@ func (r *communityRepositoryImpl) Delete(ctx context.Context, communityID valueo
 
 // ExistsByID checks if a community exists by community ID
 func (r *communityRepositoryImpl) ExistsByID(ctx context.Context, communityID valueobjects.CommunityID) (bool, error) {
-	filter := bson.M{"community_id": communityID.Value()}
+	filter := bson.M{"_id": communityID.Value()}
 
 	count, err := r.collection.CountDocuments(ctx, filter)
 	if err != nil {
@@ -206,7 +205,6 @@ func (r *communityRepositoryImpl) ExistsByID(ctx context.Context, communityID va
 
 func (r *communityRepositoryImpl) entityToDocument(community *entities.Community) *communityDocument {
 	return &communityDocument{
-		ID:          community.ID(),
 		CommunityID: community.CommunityID().Value(),
 		OwnerID:     community.OwnerID().Value(),
 		Name:        community.Name().Value(),

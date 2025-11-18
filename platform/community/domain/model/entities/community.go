@@ -9,8 +9,7 @@ import (
 )
 
 type Community struct {
-	id          string                     `bson:"_id"`
-	communityID valueobjects.CommunityID   `bson:"community_id"`
+	communityID valueobjects.CommunityID   `bson:"_id"`
 	ownerID     valueobjects.OwnerID       `bson:"owner_id"`
 	name        valueobjects.CommunityName `bson:"name"`
 	description valueobjects.Description   `bson:"description"`
@@ -39,7 +38,6 @@ func NewCommunity(
 	}
 
 	return &Community{
-		id:          communityID,
 		communityID: communityIDVO,
 		ownerID:     ownerID,
 		name:        name,
@@ -54,7 +52,7 @@ func NewCommunity(
 
 // Getters
 func (c *Community) ID() string {
-	return c.id
+	return c.communityID.Value()
 }
 
 func (c *Community) CommunityID() valueobjects.CommunityID {

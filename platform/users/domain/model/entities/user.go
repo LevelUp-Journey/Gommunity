@@ -13,7 +13,6 @@ type User struct {
 	userID     valueobjects.UserID    `bson:"user_id"`
 	profileID  valueobjects.ProfileID `bson:"profile_id"`
 	username   valueobjects.Username  `bson:"username"`
-	roleID     valueobjects.RoleID    `bson:"role_id"`
 	profileURL *string                `bson:"profile_url"`
 	bannerURL  *string                `bson:"banner_url"`
 	updatedAt  time.Time              `bson:"updated_at"`
@@ -21,6 +20,7 @@ type User struct {
 }
 
 // NewUser creates a new User entity
+// Note: Users BC does not manage roles. Roles are managed per-community in Subscriptions BC
 func NewUser(
 	userID valueobjects.UserID,
 	profileID valueobjects.ProfileID,
@@ -29,13 +29,11 @@ func NewUser(
 ) (*User, error) {
 	now := time.Now()
 
-	roleID, _ := valueobjects.NewRoleID(valueobjects.UserRoleIDStr)
 	return &User{
 		id:         uuid.New().String(),
 		userID:     userID,
 		profileID:  profileID,
 		username:   username,
-		roleID:     roleID,
 		profileURL: profileURL,
 		bannerURL:  nil,
 		updatedAt:  now,
@@ -58,10 +56,6 @@ func (u *User) ProfileID() valueobjects.ProfileID {
 
 func (u *User) Username() valueobjects.Username {
 	return u.username
-}
-
-func (u *User) RoleID() valueobjects.RoleID {
-	return u.roleID
 }
 
 func (u *User) ProfileURL() *string {
@@ -87,10 +81,5 @@ func (u *User) UpdateProfile(username valueobjects.Username, profileURL *string,
 	if bannerURL != nil {
 		u.bannerURL = bannerURL
 	}
-	u.updatedAt = time.Now()
-}
-
-func (u *User) UpdateRoleID(roleID valueobjects.RoleID) {
-	u.roleID = roleID
 	u.updatedAt = time.Now()
 }

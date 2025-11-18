@@ -1,4 +1,4 @@
-basePath: /api/v1
+basePath: /
 definitions:
   Gommunity_platform_community_interfaces_rest_resources.ErrorResponse:
     properties:
@@ -363,7 +363,6 @@ definitions:
         example: johndoe
         type: string
     type: object
-host: localhost
 info:
   contact: {}
   description: Community management API with Kafka event processing
@@ -434,6 +433,134 @@ paths:
       security:
       - BearerAuth: []
       summary: Create a new community
+      tags:
+      - communities
+  /api/v1/communities/{community_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a community (only owner can delete)
+      parameters:
+      - description: Community ID (UUID)
+        in: path
+        name: community_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete community
+      tags:
+      - communities
+    get:
+      consumes:
+      - application/json
+      description: Get a specific community by its ID
+      parameters:
+      - description: Community ID (UUID)
+        in: path
+        name: community_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resources.CommunityResource'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get community by ID
+      tags:
+      - communities
+    put:
+      consumes:
+      - application/json
+      description: Update community name, description, icon and banner (only owner
+        can update)
+      parameters:
+      - description: Community ID (UUID)
+        in: path
+        name: community_id
+        required: true
+        type: string
+      - description: Community update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/resources.UpdateCommunityResource'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resources.CommunityResource'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update community information
       tags:
       - communities
   /api/v1/communities/{community_id}/posts:
@@ -622,135 +749,7 @@ paths:
       summary: Get post by ID
       tags:
       - posts
-  /api/v1/communities/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a community (only owner can delete)
-      parameters:
-      - description: Community ID (UUID)
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Delete community
-      tags:
-      - communities
-    get:
-      consumes:
-      - application/json
-      description: Get a specific community by its ID
-      parameters:
-      - description: Community ID (UUID)
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/resources.CommunityResource'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Get community by ID
-      tags:
-      - communities
-    put:
-      consumes:
-      - application/json
-      description: Update community name, description, icon and banner (only owner
-        can update)
-      parameters:
-      - description: Community ID (UUID)
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Community update request
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/resources.UpdateCommunityResource'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/resources.CommunityResource'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Update community information
-      tags:
-      - communities
-  /api/v1/communities/{id}/privacy:
+  /api/v1/communities/{community_id}/privacy:
     patch:
       consumes:
       - application/json
@@ -758,7 +757,7 @@ paths:
       parameters:
       - description: Community ID (UUID)
         in: path
-        name: id
+        name: community_id
         required: true
         type: string
       - description: Community privacy update request
