@@ -15,4 +15,10 @@ type PostRepository interface {
 	FindByAuthorAndCommunity(ctx context.Context, authorID valueobjects.AuthorID, communityID valueobjects.CommunityID) (*entities.Post, error)
 	FindByCommunities(ctx context.Context, communityIDs []valueobjects.CommunityID, postType *valueobjects.PostType, limit, offset *int) ([]*entities.Post, error)
 	Delete(ctx context.Context, postID valueobjects.PostID) error
+
+	// FindPostIDsByCommunity returns only post IDs for a community (for cascade deletion)
+	FindPostIDsByCommunity(ctx context.Context, communityID valueobjects.CommunityID) ([]valueobjects.PostID, error)
+
+	// DeleteByCommunity removes all posts for a community
+	DeleteByCommunity(ctx context.Context, communityID valueobjects.CommunityID) error
 }

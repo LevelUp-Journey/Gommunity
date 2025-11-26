@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"time"
 
 	"Gommunity/platform/community/domain/model/entities"
 	"Gommunity/platform/community/domain/model/valueobjects"
@@ -218,6 +219,11 @@ func (r *communityRepositoryImpl) entityToDocument(community *entities.Community
 }
 
 func (r *communityRepositoryImpl) documentToEntity(doc *communityDocument) (*entities.Community, error) {
+	communityID, err := valueobjects.NewCommunityID(doc.CommunityID)
+	if err != nil {
+		return nil, err
+	}
+
 	ownerID, err := valueobjects.NewOwnerID(doc.OwnerID)
 	if err != nil {
 		return nil, err
@@ -233,10 +239,18 @@ func (r *communityRepositoryImpl) documentToEntity(doc *communityDocument) (*ent
 		return nil, err
 	}
 
-	community, err := entities.NewCommunity(ownerID, name, description, doc.IconURL, doc.BannerURL, doc.IsPrivate)
-	if err != nil {
-		return nil, err
-	}
+	createdAt := time.Unix(doc.CreatedAt, 0)
+	updatedAt := time.Unix(doc.UpdatedAt, 0)
 
-	return community, nil
+	return entities.ReconstructCommunity(
+		communityID,
+		ownerID,
+		name,
+		description,
+		doc.IconURL,
+		doc.BannerURL,
+		doc.IsPrivate,
+		createdAt,
+		updatedAt,
+	), nil
 }

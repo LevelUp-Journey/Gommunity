@@ -129,6 +129,31 @@ func (c *Community) UpdatePrivacy(isPrivate bool) {
 	c.updatedAt = time.Now()
 }
 
+// ReconstructCommunity rebuilds a community from persisted data without generating new IDs or timestamps.
+func ReconstructCommunity(
+	communityID valueobjects.CommunityID,
+	ownerID valueobjects.OwnerID,
+	name valueobjects.CommunityName,
+	description valueobjects.Description,
+	iconURL *string,
+	bannerURL *string,
+	isPrivate bool,
+	createdAt time.Time,
+	updatedAt time.Time,
+) *Community {
+	return &Community{
+		communityID: communityID,
+		ownerID:     ownerID,
+		name:        name,
+		description: description,
+		iconURL:     iconURL,
+		bannerURL:   bannerURL,
+		isPrivate:   isPrivate,
+		createdAt:   createdAt,
+		updatedAt:   updatedAt,
+	}
+}
+
 // IsOwner checks if the given userID is the owner of the community
 func (c *Community) IsOwner(userID string) bool {
 	return c.ownerID.Value() == userID

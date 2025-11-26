@@ -61,3 +61,13 @@ func (s *ExternalSubscriptionsService) CreateOwnerSubscription(
 
 	return nil
 }
+
+// DeleteSubscriptionsByCommunity removes all subscriptions for the given community
+func (s *ExternalSubscriptionsService) DeleteSubscriptionsByCommunity(ctx context.Context, communityID community_vo.CommunityID) error {
+	subCommunityID, err := subscription_vo.NewCommunityID(communityID.Value())
+	if err != nil {
+		return fmt.Errorf("failed to create community ID: %w", err)
+	}
+
+	return s.subscriptionCommandService.HandleDeleteByCommunity(ctx, subCommunityID)
+}

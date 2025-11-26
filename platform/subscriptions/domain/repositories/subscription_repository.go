@@ -35,4 +35,7 @@ type SubscriptionRepository interface {
 
 	// DeleteByUserAndCommunity removes a subscription by user and community
 	DeleteByUserAndCommunity(ctx context.Context, userID valueobjects.UserID, communityID valueobjects.CommunityID) error
+
+	// DeleteByCommunity removes all subscriptions for a given community
+	DeleteByCommunity(ctx context.Context, communityID valueobjects.CommunityID) error
 }

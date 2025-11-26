@@ -199,6 +199,30 @@ func (r *reactionRepositoryImpl) DeleteByPostAndUser(ctx context.Context, postID
 	return nil
 }
 
+// DeleteByPostIDs removes reactions for a list of posts
+func (r *reactionRepositoryImpl) DeleteByPostIDs(ctx context.Context, postIDs []valueobjects.PostID) error {
+	if len(postIDs) == 0 {
+		return nil
+	}
+
+	values := make([]string, 0, len(postIDs))
+	for _, id := range postIDs {
+		values = append(values, id.Value())
+	}
+
+	filter := bson.M{
+		"post_id": bson.M{"$in": values},
+	}
+
+	_, err := r.collection.DeleteMany(ctx, filter)
+	if err != nil {
+		log.Printf("failed to delete reactions by posts: %v", err)
+		return err
+	}
+
+	return nil
+}
+
 func (r *reactionRepositoryImpl) entityToDocument(reaction *entities.Reaction) *reactionDocument {
 	return &reactionDocument{
 		ID:           reaction.ReactionID().Value(),

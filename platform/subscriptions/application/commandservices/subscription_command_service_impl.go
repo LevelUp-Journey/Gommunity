@@ -228,3 +228,8 @@ func (s *subscriptionCommandServiceImpl) HandleUnsubscribe(ctx context.Context, 
 
 	return nil
 }
+
+// HandleDeleteByCommunity removes all subscriptions for a given community
+func (s *subscriptionCommandServiceImpl) HandleDeleteByCommunity(ctx context.Context, communityID valueobjects.CommunityID) error {
+	return s.subscriptionRepo.DeleteByCommunity(ctx, communityID)
+}

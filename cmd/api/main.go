@@ -167,11 +167,15 @@ func main() {
 
 	// Initialize Community BC ACL service for subscriptions
 	communityExternalSubscriptionsService := community_acl.NewExternalSubscriptionsService(subscriptionCommandService)
+	communityExternalPostsService := community_acl.NewExternalPostsService(postRepository)
+	communityExternalReactionsService := community_acl.NewExternalReactionsService(reactionRepository)
 
 	// Initialize Community BC command service with subscription dependency
 	communityCommandService := community_commandservices.NewCommunityCommandService(
 		communityRepository,
 		communityExternalSubscriptionsService,
+		communityExternalPostsService,
+		communityExternalReactionsService,
 	)
 
 	postExternalUsersService := posts_acl.NewExternalUsersService(usersFacade)
