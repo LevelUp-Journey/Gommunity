@@ -10,16 +10,14 @@ type PostContent struct {
 	value string `json:"value" bson:"content"`
 }
 
-// NewPostContent validates markdown content ensuring it preserves line breaks.
+// NewPostContent validates post content.
+// Content can be plain text or markdown - no format restrictions.
 func NewPostContent(value string) (PostContent, error) {
 	if strings.TrimSpace(value) == "" {
 		return PostContent{}, errors.New("post content cannot be empty")
 	}
 
-	if !containsLineBreak(value) {
-		return PostContent{}, errors.New("post content must include at least one line break for markdown formatting")
-	}
-
+	// Users can write anything they want - no format restrictions
 	return PostContent{value: value}, nil
 }
 
@@ -31,8 +29,4 @@ func (c PostContent) Value() string {
 // IsZero indicates if the content is empty.
 func (c PostContent) IsZero() bool {
 	return c.value == ""
-}
-
-func containsLineBreak(value string) bool {
-	return strings.Contains(value, "\n") || strings.Contains(value, "\r")
 }

@@ -155,23 +155,6 @@ func (r *postRepositoryImpl) FindByCommunities(ctx context.Context, communityIDs
 	return posts, nil
 }
 
-// FindByAuthorAndCommunity retrieves a publication constraint for a user.
-func (r *postRepositoryImpl) FindByAuthorAndCommunity(ctx context.Context, authorID valueobjects.AuthorID, communityID valueobjects.CommunityID) (*entities.Post, error) {
-	filter := bson.M{
-		"author_id":    authorID.Value(),
-		"community_id": communityID.Value(),
-	}
-
-	var doc postDocument
-	if err := r.collection.FindOne(ctx, filter).Decode(&doc); err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, nil
-		}
-		return nil, err
-	}
-	return r.documentToEntity(&doc)
-}
-
 // Delete removes a post by identifier.
 func (r *postRepositoryImpl) Delete(ctx context.Context, postID valueobjects.PostID) error {
 	filter := bson.M{"post_id": postID.Value()}
