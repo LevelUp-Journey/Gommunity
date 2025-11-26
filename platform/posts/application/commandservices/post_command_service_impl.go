@@ -82,14 +82,7 @@ func (s *postCommandServiceImpl) HandlePublish(ctx context.Context, cmd commands
 		return nil, errors.New("user is not allowed to publish messages in this community")
 	}
 
-	alreadyPublished, err := s.postRepository.FindByAuthorAndCommunity(ctx, cmd.AuthorID(), cmd.CommunityID())
-	if err != nil {
-		return nil, fmt.Errorf("failed to verify publication constraints: %w", err)
-	}
-	if alreadyPublished != nil {
-		return nil, errors.New("user already has a publication in this community, delete it before creating another")
-	}
-
+	// Users can create multiple posts in the same community
 	post, err := entities.NewPost(
 		cmd.CommunityID(),
 		cmd.AuthorID(),
