@@ -16,15 +16,21 @@ import (
 type communityCommandServiceImpl struct {
 	communityRepo                repositories.CommunityRepository
 	externalSubscriptionsService *acl.ExternalSubscriptionsService
+	externalPostsService         *acl.ExternalPostsService
+	externalReactionsService     *acl.ExternalReactionsService
 }
 
 func NewCommunityCommandService(
 	communityRepo repositories.CommunityRepository,
 	externalSubscriptionsService *acl.ExternalSubscriptionsService,
+	externalPostsService *acl.ExternalPostsService,
+	externalReactionsService *acl.ExternalReactionsService,
 ) services.CommunityCommandService {
 	return &communityCommandServiceImpl{
 		communityRepo:                communityRepo,
 		externalSubscriptionsService: externalSubscriptionsService,
+		externalPostsService:         externalPostsService,
+		externalReactionsService:     externalReactionsService,
 	}
 }
 
@@ -90,6 +96,28 @@ func (s *communityCommandServiceImpl) HandleDelete(ctx context.Context, cmd comm
 	// Delete community
 	if err := s.communityRepo.Delete(ctx, cmd.CommunityID()); err != nil {
 		log.Printf("Error deleting community: %v", err)
+		return err
+	}
+
+	// Cascade delete: reactions -> posts -> subscriptions (followers)
+	postIDs, err := s.externalPostsService.GetPostIDsByCommunity(ctx, cmd.CommunityID())
+	if err != nil {
+		log.Printf("Error fetching post IDs for cascade delete: %v", err)
+		return err
+	}
+
+	if err := s.externalReactionsService.DeleteReactionsByPostIDs(ctx, postIDs); err != nil {
+		log.Printf("Error deleting reactions for community %s: %v", cmd.CommunityID().Value(), err)
+		return err
+	}
+
+	if err := s.externalPostsService.DeletePostsByCommunity(ctx, cmd.CommunityID()); err != nil {
+		log.Printf("Error deleting posts for community %s: %v", cmd.CommunityID().Value(), err)
+		return err
+	}
+
+	if err := s.externalSubscriptionsService.DeleteSubscriptionsByCommunity(ctx, cmd.CommunityID()); err != nil {
+		log.Printf("Error deleting subscriptions for community %s: %v", cmd.CommunityID().Value(), err)
 		return err
 	}
 

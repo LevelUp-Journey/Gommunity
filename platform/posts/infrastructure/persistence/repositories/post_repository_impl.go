@@ -186,6 +186,49 @@ func (r *postRepositoryImpl) Delete(ctx context.Context, postID valueobjects.Pos
 	return nil
 }
 
+// FindPostIDsByCommunity returns post IDs for a community (lightweight)
+func (r *postRepositoryImpl) FindPostIDsByCommunity(ctx context.Context, communityID valueobjects.CommunityID) ([]valueobjects.PostID, error) {
+	filter := bson.M{"community_id": communityID.Value()}
+	projection := bson.M{"post_id": 1}
+
+	cursor, err := r.collection.Find(ctx, filter, options.Find().SetProjection(projection))
+	if err != nil {
+		log.Printf("failed to list post ids by community: %v", err)
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var ids []valueobjects.PostID
+	for cursor.Next(ctx) {
+		var doc postDocument
+		if err := cursor.Decode(&doc); err != nil {
+			return nil, err
+		}
+		postID, err := valueobjects.NewPostID(doc.PostID)
+		if err != nil {
+			return nil, err
+		}
+		ids = append(ids, postID)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	return ids, nil
+}
+
+// DeleteByCommunity removes all posts for a community
+func (r *postRepositoryImpl) DeleteByCommunity(ctx context.Context, communityID valueobjects.CommunityID) error {
+	filter := bson.M{"community_id": communityID.Value()}
+	_, err := r.collection.DeleteMany(ctx, filter)
+	if err != nil {
+		log.Printf("failed to delete posts by community: %v", err)
+		return err
+	}
+	return nil
+}
+
 func (r *postRepositoryImpl) entityToDocument(post *entities.Post) *postDocument {
 	return &postDocument{
 		ID:          post.PostID().Value(),

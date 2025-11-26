@@ -14,4 +14,7 @@ type SubscriptionCommandService interface {
 
 	// HandleUnsubscribe processes an UnsubscribeUserCommand to remove a user from a community
 	HandleUnsubscribe(ctx context.Context, cmd commands.UnsubscribeUserCommand) error
+
+	// HandleDeleteByCommunity removes all subscriptions linked to a community
+	HandleDeleteByCommunity(ctx context.Context, communityID valueobjects.CommunityID) error
 }

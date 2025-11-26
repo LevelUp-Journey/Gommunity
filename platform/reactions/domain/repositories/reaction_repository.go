@@ -17,4 +17,7 @@ type ReactionRepository interface {
 	CountByPost(ctx context.Context, postID valueobjects.PostID) (map[string]int, error)
 	Delete(ctx context.Context, reactionID valueobjects.ReactionID) error
 	DeleteByPostAndUser(ctx context.Context, postID valueobjects.PostID, userID valueobjects.UserID) error
+
+	// DeleteByPostIDs removes reactions linked to the provided posts
+	DeleteByPostIDs(ctx context.Context, postIDs []valueobjects.PostID) error
 }

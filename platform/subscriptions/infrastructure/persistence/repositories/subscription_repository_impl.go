@@ -224,6 +224,20 @@ func (r *subscriptionRepositoryImpl) DeleteByUserAndCommunity(ctx context.Contex
 	return nil
 }
 
+// DeleteByCommunity removes all subscriptions for a community
+func (r *subscriptionRepositoryImpl) DeleteByCommunity(ctx context.Context, communityID valueobjects.CommunityID) error {
+	filter := bson.M{
+		"community_id": communityID.Value(),
+	}
+
+	_, err := r.collection.DeleteMany(ctx, filter)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // toDocument converts an entity to a document
 func (r *subscriptionRepositoryImpl) toDocument(subscription *entities.Subscription) *subscriptionDocument {
 	return &subscriptionDocument{
