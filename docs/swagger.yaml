@@ -350,9 +350,6 @@ definitions:
       profileUrl:
         example: https://example.com/profile.jpg
         type: string
-      role:
-        example: user
-        type: string
       updatedAt:
         example: "2025-11-13T17:02:46Z"
         type: string

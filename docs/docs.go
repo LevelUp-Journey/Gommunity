@@ -2052,10 +2052,6 @@ const docTemplate = `{
                     "type": "string",
                     "example": "https://example.com/profile.jpg"
                 },
-                "role": {
-                    "type": "string",
-                    "example": "user"
-                },
                 "updatedAt": {
                     "type": "string",
                     "example": "2025-11-13T17:02:46Z"
