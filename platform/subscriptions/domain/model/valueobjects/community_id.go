@@ -4,10 +4,11 @@ import (
 	"errors"
 	"fmt"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/google/uuid"
 )
 
 // CommunityID represents a Community ID from the Communities bounded context
+// This value object uses UUID format to match the Communities BC format
 type CommunityID struct {
 	value string `json:"value" bson:"community_id"`
 }
@@ -16,9 +17,12 @@ func NewCommunityID(value string) (CommunityID, error) {
 	if value == "" {
 		return CommunityID{}, errors.New("community ID cannot be empty")
 	}
-	if !primitive.IsValidObjectID(value) {
-		return CommunityID{}, errors.New("community ID must be a valid ObjectID")
+
+	// Validate UUID format to match Communities BC
+	if _, err := uuid.Parse(value); err != nil {
+		return CommunityID{}, errors.New("community ID must be a valid UUID")
 	}
+
 	return CommunityID{value: value}, nil
 }
 
