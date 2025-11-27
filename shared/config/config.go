@@ -55,12 +55,12 @@ func Load() (*Config, error) {
 		ServiceDiscoveryURL:  strings.TrimSuffix(getEnv("SERVICE_DISCOVERY_URL", "http://127.0.0.1:8761/eureka"), "/"),
 		ServerIP:             getEnv("SERVER_IP", "127.0.0.1"),
 		ServiceName:          getEnv("SERVICE_NAME", "gommunity-service"),
-		APIPrefix:            getEnv("API_PREFIX", "/api/v1"),
-		CORSAllowedOrigins:   getEnvSlice("CORS_ALLOWED_ORIGINS", []string{"http://localhost:3000"}),
-		CORSAllowedMethods:   getEnvSlice("CORS_ALLOWED_METHODS", []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"}),
-		CORSAllowedHeaders:   getEnvSlice("CORS_ALLOWED_HEADERS", []string{"*"}),
-		CORSAllowCredentials: getEnvBool("CORS_ALLOW_CREDENTIALS", true),
-		CORSMaxAge:           getEnvDuration("CORS_MAX_AGE", 12*time.Hour),
+		APIPrefix:            "/api/v1",
+		CORSAllowedOrigins:   []string{"http://localhost:3000"},
+		CORSAllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
+		CORSAllowedHeaders:   []string{"*"},
+		CORSAllowCredentials: true,
+		CORSMaxAge:           12 * time.Hour,
 	}
 
 	return config, nil

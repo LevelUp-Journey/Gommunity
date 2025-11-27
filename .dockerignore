@@ -1,0 +1,33 @@
+# Version control
+.git
+.gitignore
+
+# Build artifacts
+bin/
+dist/
+main
+*.exe
+*.test
+*.out
+
+# Dependency directories (if present locally)
+vendor/
+
+# Environment files (secrets should not be in the image)
+.env
+.env.local
+
+# IDE settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Documentation
+*.md
+
