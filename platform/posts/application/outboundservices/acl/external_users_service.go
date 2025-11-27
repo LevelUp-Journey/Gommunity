@@ -23,3 +23,8 @@ func NewExternalUsersService(usersFacade users_acl.UsersFacade) *ExternalUsersSe
 func (s *ExternalUsersService) ValidateUserExists(ctx context.Context, userID valueobjects.AuthorID) (bool, error) {
 	return s.usersFacade.ValidateUserExists(ctx, userID.Value())
 }
+
+// GetProfileIDByUserID retrieves the profile ID (UUID) for a given user ID.
+func (s *ExternalUsersService) GetProfileIDByUserID(ctx context.Context, userID valueobjects.AuthorID) (string, error) {
+	return s.usersFacade.GetProfileIDByUserID(ctx, userID.Value())
+}

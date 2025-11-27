@@ -80,9 +80,13 @@ func (s *subscriptionCommandServiceImpl) Handle(ctx context.Context, cmd command
 	var actualRole valueobjects.CommunityRole
 
 	if cmd.IsSelfSubscription() {
-		// IMPORTANT: When users subscribe themselves (follow a community), they ALWAYS get the 'member' role
-		// regardless of what role they requested. This prevents privilege escalation.
-		actualRole = valueobjects.MemberRole
+		// Self-subscriptions default to member, except for the special case when the creator
+		// is subscribing themselves as the community owner during creation.
+		if cmd.Role().IsOwner() {
+			actualRole = valueobjects.OwnerRole
+		} else {
+			actualRole = valueobjects.MemberRole
+		}
 	} else {
 		// When an admin/teacher adds another user, they can specify the role
 		actualRole = cmd.Role()
@@ -98,14 +102,8 @@ func (s *subscriptionCommandServiceImpl) Handle(ctx context.Context, cmd command
 				return nil, fmt.Errorf("failed to check requester permissions: %w", err)
 			}
 
-			// Check if requester is the community owner
-			// Get requester's profile ID to compare with owner ID
-			requesterProfileID, err := s.externalUsersService.GetProfileIDByUserID(ctx, cmd.RequestedBy())
-			if err != nil {
-				return nil, fmt.Errorf("failed to get requester profile ID: %w", err)
-			}
-
-			isOwner, err := s.externalCommunitiesService.ValidateUserIsOwner(ctx, cmd.CommunityID(), requesterProfileID)
+			// Check if requester is the community owner (supports owner stored as userID or profileID)
+			isOwner, err := s.isOwner(ctx, cmd.CommunityID(), cmd.RequestedBy())
 			if err != nil {
 				return nil, fmt.Errorf("failed to validate owner status: %w", err)
 			}
@@ -183,14 +181,8 @@ func (s *subscriptionCommandServiceImpl) HandleUnsubscribe(ctx context.Context, 
 			return fmt.Errorf("failed to check requester permissions: %w", err)
 		}
 
-		// Check if requester is the community owner
-		// Get requester's profile ID to compare with owner ID
-		requesterProfileID, err := s.externalUsersService.GetProfileIDByUserID(ctx, cmd.RequestedBy())
-		if err != nil {
-			return fmt.Errorf("failed to get requester profile ID: %w", err)
-		}
-
-		isOwner, err := s.externalCommunitiesService.ValidateUserIsOwner(ctx, cmd.CommunityID(), requesterProfileID)
+		// Check if requester is the community owner (supports owner stored as userID or profileID)
+		isOwner, err := s.isOwner(ctx, cmd.CommunityID(), cmd.RequestedBy())
 		if err != nil {
 			return fmt.Errorf("failed to validate owner status: %w", err)
 		}
@@ -207,13 +199,7 @@ func (s *subscriptionCommandServiceImpl) HandleUnsubscribe(ctx context.Context, 
 	}
 
 	// Step 4: Prevent owner from unsubscribing (owner should always be subscribed)
-	// Get user's profile ID to compare with owner ID
-	userProfileID, err := s.externalUsersService.GetProfileIDByUserID(ctx, cmd.UserID())
-	if err != nil {
-		return fmt.Errorf("failed to get user profile ID: %w", err)
-	}
-
-	isOwner, err := s.externalCommunitiesService.ValidateUserIsOwner(ctx, cmd.CommunityID(), userProfileID)
+	isOwner, err := s.isOwner(ctx, cmd.CommunityID(), cmd.UserID())
 	if err != nil {
 		return fmt.Errorf("failed to validate owner status: %w", err)
 	}
@@ -232,4 +218,24 @@ func (s *subscriptionCommandServiceImpl) HandleUnsubscribe(ctx context.Context, 
 // HandleDeleteByCommunity removes all subscriptions for a given community
 func (s *subscriptionCommandServiceImpl) HandleDeleteByCommunity(ctx context.Context, communityID valueobjects.CommunityID) error {
 	return s.subscriptionRepo.DeleteByCommunity(ctx, communityID)
+}
+
+// isOwner checks ownership using userID and, as fallback, the profileID to support both storage strategies.
+func (s *subscriptionCommandServiceImpl) isOwner(ctx context.Context, communityID valueobjects.CommunityID, userID valueobjects.UserID) (bool, error) {
+	isOwner, err := s.externalCommunitiesService.ValidateUserIsOwner(ctx, communityID, userID.Value())
+	if err != nil {
+		return false, err
+	}
+
+	if isOwner {
+		return true, nil
+	}
+
+	// Some environments store owner as profileID instead of userID. Try profileID if available.
+	profileID, err := s.externalUsersService.GetProfileIDByUserID(ctx, userID)
+	if err != nil || profileID == "" {
+		return false, nil
+	}
+
+	return s.externalCommunitiesService.ValidateUserIsOwner(ctx, communityID, profileID)
 }

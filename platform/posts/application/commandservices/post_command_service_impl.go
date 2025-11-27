@@ -79,9 +79,30 @@ func (s *postCommandServiceImpl) HandlePublish(ctx context.Context, cmd commands
 		role = &ownerRole
 	}
 
-	// Only owners and admins can publish
+	// Only owners and admins can publish. If the stored role is not admin/owner,
+	// double-check ownership to tolerate cases where the owner got re-subscribed as member.
 	if !role.IsAdminOrOwner() {
-		return nil, errors.New("only community owners and admins can publish posts")
+		isOwner, err := s.externalCommunitiesService.ValidateUserIsOwner(ctx, cmd.CommunityID(), cmd.AuthorID())
+		if err != nil {
+			return nil, fmt.Errorf("failed to verify ownership: %w", err)
+		}
+
+		if !isOwner {
+			// Some deployments store the community owner using profileID instead of userID.
+			// Fetch profileID and retry ownership check to avoid false negatives.
+			if profileID, profileErr := s.externalUsersService.GetProfileIDByUserID(ctx, cmd.AuthorID()); profileErr == nil {
+				if profileAuthorID, voErr := valueobjects.NewAuthorID(profileID); voErr == nil {
+					isOwner, err = s.externalCommunitiesService.ValidateUserIsOwner(ctx, cmd.CommunityID(), profileAuthorID)
+					if err != nil {
+						return nil, fmt.Errorf("failed to verify ownership: %w", err)
+					}
+				}
+			}
+		}
+
+		if !isOwner {
+			return nil, errors.New("only community owners and admins can publish posts")
+		}
 	}
 
 	// Create and save post
