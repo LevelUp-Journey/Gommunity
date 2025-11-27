@@ -7,10 +7,10 @@ import (
 )
 
 // CreatePostCommand represents the intent to publish a new post.
+// Only community owners and admins can create posts.
 type CreatePostCommand struct {
 	communityID valueobjects.CommunityID
 	authorID    valueobjects.AuthorID
-	postType    valueobjects.PostType
 	content     valueobjects.PostContent
 	images      valueobjects.PostImages
 }
@@ -19,7 +19,6 @@ type CreatePostCommand struct {
 func NewCreatePostCommand(
 	communityID valueobjects.CommunityID,
 	authorID valueobjects.AuthorID,
-	postType valueobjects.PostType,
 	content valueobjects.PostContent,
 	images valueobjects.PostImages,
 ) (CreatePostCommand, error) {
@@ -29,9 +28,6 @@ func NewCreatePostCommand(
 	if authorID.IsZero() {
 		return CreatePostCommand{}, errors.New("author ID is required")
 	}
-	if postType.IsZero() {
-		return CreatePostCommand{}, errors.New("post type is required")
-	}
 	if content.IsZero() {
 		return CreatePostCommand{}, errors.New("content is required")
 	}
@@ -39,7 +35,6 @@ func NewCreatePostCommand(
 	return CreatePostCommand{
 		communityID: communityID,
 		authorID:    authorID,
-		postType:    postType,
 		content:     content,
 		images:      images,
 	}, nil
@@ -55,12 +50,7 @@ func (c CreatePostCommand) AuthorID() valueobjects.AuthorID {
 	return c.authorID
 }
 
-// PostType returns the requested post type.
-func (c CreatePostCommand) PostType() valueobjects.PostType {
-	return c.postType
-}
-
-// Content returns the markdown content.
+// Content returns the post content.
 func (c CreatePostCommand) Content() valueobjects.PostContent {
 	return c.content
 }

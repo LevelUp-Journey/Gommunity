@@ -7,13 +7,13 @@ import (
 	"Gommunity/platform/posts/domain/model/valueobjects"
 )
 
-// Post represents a publication made inside a community.
+// Post represents a message publication made inside a community.
+// All posts are messages - announcements have been removed.
 type Post struct {
 	id          string
 	postID      valueobjects.PostID
 	communityID valueobjects.CommunityID
 	authorID    valueobjects.AuthorID
-	postType    valueobjects.PostType
 	content     valueobjects.PostContent
 	images      valueobjects.PostImages
 	createdAt   time.Time
@@ -21,10 +21,10 @@ type Post struct {
 }
 
 // NewPost creates a new post aggregate.
+// Only community owners and admins can create posts.
 func NewPost(
 	communityID valueobjects.CommunityID,
 	authorID valueobjects.AuthorID,
-	postType valueobjects.PostType,
 	content valueobjects.PostContent,
 	images valueobjects.PostImages,
 ) (*Post, error) {
@@ -33,9 +33,6 @@ func NewPost(
 	}
 	if authorID.IsZero() {
 		return nil, errors.New("author ID is required")
-	}
-	if postType.IsZero() {
-		return nil, errors.New("post type is required")
 	}
 	if content.IsZero() {
 		return nil, errors.New("post content is required")
@@ -49,7 +46,6 @@ func NewPost(
 		postID:      postID,
 		communityID: communityID,
 		authorID:    authorID,
-		postType:    postType,
 		content:     content,
 		images:      images,
 		createdAt:   now,
@@ -63,7 +59,6 @@ func ReconstructPost(
 	postID valueobjects.PostID,
 	communityID valueobjects.CommunityID,
 	authorID valueobjects.AuthorID,
-	postType valueobjects.PostType,
 	content valueobjects.PostContent,
 	images valueobjects.PostImages,
 	createdAt time.Time,
@@ -74,7 +69,6 @@ func ReconstructPost(
 		postID:      postID,
 		communityID: communityID,
 		authorID:    authorID,
-		postType:    postType,
 		content:     content,
 		images:      images,
 		createdAt:   createdAt,
@@ -100,11 +94,6 @@ func (p *Post) CommunityID() valueobjects.CommunityID {
 // AuthorID returns the author identifier.
 func (p *Post) AuthorID() valueobjects.AuthorID {
 	return p.authorID
-}
-
-// PostType returns the type of publication.
-func (p *Post) PostType() valueobjects.PostType {
-	return p.postType
 }
 
 // Content returns the post content.

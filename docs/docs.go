@@ -437,7 +437,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Members can create messages while admins or owners can also create announcements.",
+                "description": "Only community owners and admins can create posts.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1712,21 +1712,13 @@ const docTemplate = `{
             "properties": {
                 "content": {
                     "type": "string",
-                    "example": "Hello community!\nThis is a markdown-enabled post."
+                    "example": "Hello community!"
                 },
                 "images": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
-                },
-                "type": {
-                    "type": "string",
-                    "enum": [
-                        "message",
-                        "announcement"
-                    ],
-                    "example": "message"
                 }
             }
         },
@@ -1809,10 +1801,6 @@ const docTemplate = `{
                 "postId": {
                     "type": "string",
                     "example": "64c2f1e5b9d3a45f78901234"
-                },
-                "type": {
-                    "type": "string",
-                    "example": "message"
                 },
                 "updatedAt": {
                     "type": "string",

@@ -12,7 +12,7 @@ type PostRepository interface {
 	Save(ctx context.Context, post *entities.Post) error
 	FindByID(ctx context.Context, postID valueobjects.PostID) (*entities.Post, error)
 	FindByCommunity(ctx context.Context, communityID valueobjects.CommunityID, limit, offset *int) ([]*entities.Post, error)
-	FindByCommunities(ctx context.Context, communityIDs []valueobjects.CommunityID, postType *valueobjects.PostType, limit, offset *int) ([]*entities.Post, error)
+	FindByCommunities(ctx context.Context, communityIDs []valueobjects.CommunityID, limit, offset *int) ([]*entities.Post, error)
 	Delete(ctx context.Context, postID valueobjects.PostID) error
 
 	// FindPostIDsByCommunity returns only post IDs for a community (for cascade deletion)

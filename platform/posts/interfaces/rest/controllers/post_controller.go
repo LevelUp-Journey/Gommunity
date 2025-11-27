@@ -35,7 +35,7 @@ func NewPostController(
 
 // CreatePost godoc
 // @Summary Publish a new post
-// @Description Members can create messages while admins or owners can also create announcements.
+// @Description Only community owners and admins can create posts.
 // @Tags posts
 // @Accept json
 // @Produce json
@@ -76,15 +76,6 @@ func (c *PostController) CreatePost(ctx *gin.Context) {
 		return
 	}
 
-	postType := valueobjects.DefaultMessageType()
-	if req.Type != "" {
-		postType, err = valueobjects.NewPostType(req.Type)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, resources.ErrorResponse{Error: err.Error()})
-			return
-		}
-	}
-
 	content, err := valueobjects.NewPostContent(req.Content)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, resources.ErrorResponse{Error: err.Error()})
@@ -97,7 +88,7 @@ func (c *PostController) CreatePost(ctx *gin.Context) {
 		return
 	}
 
-	cmd, err := commands.NewCreatePostCommand(communityID, authorID, postType, content, images)
+	cmd, err := commands.NewCreatePostCommand(communityID, authorID, content, images)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, resources.ErrorResponse{Error: err.Error()})
 		return
@@ -295,7 +286,6 @@ func (c *PostController) toResource(post *entities.Post) resources.PostResource 
 		PostID:      post.PostID().Value(),
 		CommunityID: post.CommunityID().Value(),
 		AuthorID:    post.AuthorID().Value(),
-		Type:        post.PostType().Value(),
 		Content:     post.Content().Value(),
 		Images:      post.Images().URLs(),
 		CreatedAt:   post.CreatedAt(),

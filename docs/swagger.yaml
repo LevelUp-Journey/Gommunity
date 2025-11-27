@@ -100,20 +100,12 @@ definitions:
   resources.CreatePostResource:
     properties:
       content:
-        example: |-
-          Hello community!
-          This is a markdown-enabled post.
+        example: Hello community!
         type: string
       images:
         items:
           type: string
         type: array
-      type:
-        enum:
-        - message
-        - announcement
-        example: message
-        type: string
     required:
     - content
     type: object
@@ -175,9 +167,6 @@ definitions:
         type: array
       postId:
         example: 64c2f1e5b9d3a45f78901234
-        type: string
-      type:
-        example: message
         type: string
       updatedAt:
         example: "2025-01-12T12:05:00Z"
@@ -611,8 +600,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Members can create messages while admins or owners can also create
-        announcements.
+      description: Only community owners and admins can create posts.
       parameters:
       - description: Community ID (UUID)
         in: path
