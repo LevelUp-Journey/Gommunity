@@ -1,10 +1,291 @@
 basePath: /
 definitions:
-  resources.ErrorResponse:
+  Gommunity_platform_community_interfaces_rest_resources.ErrorResponse:
     properties:
       error:
         example: Invalid request
         type: string
+    type: object
+  Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse:
+    properties:
+      error:
+        example: Invalid request
+        type: string
+    type: object
+  Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse:
+    properties:
+      error:
+        example: Invalid request
+        type: string
+    type: object
+  Gommunity_platform_users_interfaces_rest_resources.ErrorResponse:
+    properties:
+      error:
+        example: Invalid request
+        type: string
+    type: object
+  resources.AddReactionResource:
+    properties:
+      reactionType:
+        enum:
+        - like
+        - love
+        - haha
+        - wow
+        - sad
+        - angry
+        example: like
+        type: string
+    required:
+    - reactionType
+    type: object
+  resources.CommunityResource:
+    properties:
+      bannerUrl:
+        example: https://example.com/banner.jpg
+        type: string
+      communityId:
+        example: 550e8400-e29b-41d4-a716-446655440001
+        type: string
+      createdAt:
+        example: "2025-11-13T17:02:46Z"
+        type: string
+      description:
+        example: A community for data science enthusiasts to share knowledge and collaborate
+        type: string
+      iconUrl:
+        example: https://example.com/icon.jpg
+        type: string
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      isPrivate:
+        example: false
+        type: boolean
+      name:
+        example: Data Science Community
+        type: string
+      ownerId:
+        example: 550e8400-e29b-41d4-a716-446655440002
+        type: string
+      updatedAt:
+        example: "2025-11-13T17:02:46Z"
+        type: string
+    type: object
+  resources.CreateCommunityResource:
+    properties:
+      bannerUrl:
+        example: https://example.com/banner.jpg
+        type: string
+      description:
+        example: A community for data science enthusiasts to share knowledge and collaborate
+        maxLength: 500
+        minLength: 10
+        type: string
+      iconUrl:
+        example: https://example.com/icon.jpg
+        type: string
+      isPrivate:
+        example: false
+        type: boolean
+      name:
+        example: Data Science Community
+        maxLength: 100
+        minLength: 3
+        type: string
+    required:
+    - description
+    - name
+    type: object
+  resources.CreatePostResource:
+    properties:
+      content:
+        example: Hello community!
+        type: string
+      images:
+        items:
+          type: string
+        type: array
+    required:
+    - content
+    type: object
+  resources.FeedItemResource:
+    properties:
+      authorId:
+        example: user123
+        type: string
+      communityId:
+        example: 507f1f77bcf86cd799439012
+        type: string
+      content:
+        example: This is an important announcement
+        type: string
+      createdAt:
+        example: "2023-01-01T00:00:00Z"
+        type: string
+      messageType:
+        example: announcement
+        type: string
+      postId:
+        example: 507f1f77bcf86cd799439011
+        type: string
+      updatedAt:
+        example: "2023-01-01T00:00:00Z"
+        type: string
+    type: object
+  resources.FeedResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/resources.FeedItemResource'
+        type: array
+      total:
+        example: 10
+        type: integer
+    type: object
+  resources.PostResource:
+    properties:
+      authorId:
+        example: 550e8400-e29b-41d4-a716-446655440003
+        type: string
+      communityId:
+        example: 550e8400-e29b-41d4-a716-446655440002
+        type: string
+      content:
+        example: |-
+          Hello students!
+          Remember to submit your projects.
+        type: string
+      createdAt:
+        example: "2025-01-12T12:00:00Z"
+        type: string
+      images:
+        example:
+        - https://example.com/image.png
+        items:
+          type: string
+        type: array
+      postId:
+        example: 64c2f1e5b9d3a45f78901234
+        type: string
+      updatedAt:
+        example: "2025-01-12T12:05:00Z"
+        type: string
+    type: object
+  resources.ReactionCountResource:
+    properties:
+      counts:
+        additionalProperties:
+          type: integer
+        example:
+          haha: 5
+          like: 25
+          love: 10
+          wow: 2
+        type: object
+      postId:
+        example: 64c2f1e5b9d3a45f78901235
+        type: string
+      totalCount:
+        example: 42
+        type: integer
+    type: object
+  resources.ReactionResource:
+    properties:
+      createdAt:
+        example: "2025-01-12T12:00:00Z"
+        type: string
+      postId:
+        example: 64c2f1e5b9d3a45f78901235
+        type: string
+      reactionId:
+        example: 64c2f1e5b9d3a45f78901234
+        type: string
+      reactionType:
+        example: like
+        type: string
+      updatedAt:
+        example: "2025-01-12T12:05:00Z"
+        type: string
+      userId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+    type: object
+  resources.SubscribeUserResource:
+    properties:
+      community_id:
+        example: 507f1f77bcf86cd799439012
+        type: string
+      role:
+        enum:
+        - member
+        - admin
+        - owner
+        example: member
+        type: string
+      user_id:
+        example: 507f1f77bcf86cd799439013
+        type: string
+      username:
+        example: john_doe
+        maxLength: 50
+        minLength: 3
+        type: string
+    required:
+    - community_id
+    - role
+    type: object
+  resources.SubscriptionCountResource:
+    properties:
+      community_id:
+        example: 507f1f77bcf86cd799439012
+        type: string
+      count:
+        example: 150
+        type: integer
+    type: object
+  resources.SubscriptionListResource:
+    properties:
+      subscriptions:
+        items:
+          $ref: '#/definitions/resources.SubscriptionResource'
+        type: array
+      total:
+        example: 150
+        type: integer
+    type: object
+  resources.SubscriptionResource:
+    properties:
+      community_id:
+        example: 507f1f77bcf86cd799439012
+        type: string
+      created_at:
+        example: "2023-01-01T00:00:00Z"
+        type: string
+      role:
+        example: member
+        type: string
+      subscription_id:
+        example: 507f1f77bcf86cd799439011
+        type: string
+      updated_at:
+        example: "2023-01-01T00:00:00Z"
+        type: string
+      user_id:
+        example: 507f1f77bcf86cd799439013
+        type: string
+    type: object
+  resources.UnsubscribeUserResource:
+    properties:
+      community_id:
+        example: 507f1f77bcf86cd799439012
+        type: string
+      user_id:
+        example: 507f1f77bcf86cd799439013
+        type: string
+    required:
+    - community_id
+    - user_id
     type: object
   resources.UpdateBannerURLResource:
     properties:
@@ -13,6 +294,33 @@ definitions:
         type: string
     required:
     - bannerUrl
+    type: object
+  resources.UpdateCommunityPrivacyResource:
+    properties:
+      isPrivate:
+        example: true
+        type: boolean
+    required:
+    - isPrivate
+    type: object
+  resources.UpdateCommunityResource:
+    properties:
+      bannerUrl:
+        example: https://example.com/banner.jpg
+        type: string
+      description:
+        example: Updated community description
+        maxLength: 500
+        minLength: 10
+        type: string
+      iconUrl:
+        example: https://example.com/icon.jpg
+        type: string
+      name:
+        example: Updated Community Name
+        maxLength: 100
+        minLength: 3
+        type: string
     type: object
   resources.UserResource:
     properties:
@@ -38,34 +346,897 @@ definitions:
         example: 32f05fbf-9793-4205-980e-d23716627750
         type: string
       username:
-        example: mateoo
+        example: johndoe
         type: string
     type: object
-host: localhost
 info:
   contact: {}
   description: Community management API with Kafka event processing
   title: Gommunity API
   version: "1.0"
 paths:
-  /health:
+  /api/v1/communities:
     get:
       consumes:
       - application/json
-      description: Get health status of the service
+      description: Get all communities (paginated)
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
+            items:
+              $ref: '#/definitions/resources.CommunityResource'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all communities
+      tags:
+      - communities
+    post:
+      consumes:
+      - application/json
+      description: Create a new community (only for ROLE_TEACHER and ROLE_ADMIN)
+      parameters:
+      - description: Community creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/resources.CreateCommunityResource'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/resources.CommunityResource'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new community
+      tags:
+      - communities
+  /api/v1/communities/{community_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a community (only owner can delete)
+      parameters:
+      - description: Community ID (UUID)
+        in: path
+        name: community_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete community
+      tags:
+      - communities
+    get:
+      consumes:
+      - application/json
+      description: Get a specific community by its ID
+      parameters:
+      - description: Community ID (UUID)
+        in: path
+        name: community_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resources.CommunityResource'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get community by ID
+      tags:
+      - communities
+    put:
+      consumes:
+      - application/json
+      description: Update community name, description, icon and banner (only owner
+        can update)
+      parameters:
+      - description: Community ID (UUID)
+        in: path
+        name: community_id
+        required: true
+        type: string
+      - description: Community update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/resources.UpdateCommunityResource'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resources.CommunityResource'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update community information
+      tags:
+      - communities
+  /api/v1/communities/{community_id}/posts:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves posts published inside a community.
+      parameters:
+      - description: Community ID (UUID)
+        in: path
+        name: community_id
+        required: true
+        type: string
+      - description: Limit results
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - description: Skip results
+        in: query
+        minimum: 0
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/resources.PostResource'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List posts by community
+      tags:
+      - posts
+    post:
+      consumes:
+      - application/json
+      description: Only community owners and admins can create posts.
+      parameters:
+      - description: Community ID (UUID)
+        in: path
+        name: community_id
+        required: true
+        type: string
+      - description: Post payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/resources.CreatePostResource'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/resources.PostResource'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Publish a new post
+      tags:
+      - posts
+  /api/v1/communities/{community_id}/posts/{post_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Only community admins or owners can delete posts.
+      parameters:
+      - description: Community ID (UUID)
+        in: path
+        name: community_id
+        required: true
+        type: string
+      - description: Post ID (ObjectID)
+        in: path
+        name: post_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Post deleted
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a post
+      tags:
+      - posts
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a post using its identifier within a community.
+      parameters:
+      - description: Community ID (UUID)
+        in: path
+        name: community_id
+        required: true
+        type: string
+      - description: Post ID (ObjectID)
+        in: path
+        name: post_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resources.PostResource'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_posts_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get post by ID
+      tags:
+      - posts
+  /api/v1/communities/{community_id}/privacy:
+    patch:
+      consumes:
+      - application/json
+      description: Update the privacy status of a community (only owner can update)
+      parameters:
+      - description: Community ID (UUID)
+        in: path
+        name: community_id
+        required: true
+        type: string
+      - description: Community privacy update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/resources.UpdateCommunityPrivacyResource'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resources.CommunityResource'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update community privacy status
+      tags:
+      - communities
+  /api/v1/communities/my-communities:
+    get:
+      consumes:
+      - application/json
+      description: Get all communities owned by the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/resources.CommunityResource'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_community_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get my communities as owner
+      tags:
+      - communities
+  /api/v1/feed:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves announcements from all communities the user is subscribed
+        to
+      parameters:
+      - default: 20
+        description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Page offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resources.FeedResponse'
+        "400":
+          description: Bad Request
+          schema:
             additionalProperties:
               type: string
             type: object
-      summary: Health check
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user feed
       tags:
-      - health
-  /users/{id}:
+      - feed
+  /api/v1/posts/{post_id}/reactions:
+    delete:
+      consumes:
+      - application/json
+      description: Allows a user to remove their reaction from a post.
+      parameters:
+      - description: Post ID (ObjectID)
+        in: path
+        name: post_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Reaction removed
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Remove a reaction from a post
+      tags:
+      - reactions
+    post:
+      consumes:
+      - application/json
+      description: Allows a user to add a reaction to a post. If the user already
+        reacted, the reaction type will be updated.
+      parameters:
+      - description: Post ID (ObjectID)
+        in: path
+        name: post_id
+        required: true
+        type: string
+      - description: Reaction payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/resources.AddReactionResource'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/resources.ReactionResource'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Add or update a reaction to a post
+      tags:
+      - reactions
+  /api/v1/posts/{post_id}/reactions/count:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves aggregated reaction counts grouped by reaction type for
+        a specific post.
+      parameters:
+      - description: Post ID (ObjectID)
+        in: path
+        name: post_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resources.ReactionCountResource'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get reaction counts for a post
+      tags:
+      - reactions
+  /api/v1/posts/{post_id}/reactions/me:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the authenticated user's reaction on a specific post.
+      parameters:
+      - description: Post ID (ObjectID)
+        in: path
+        name: post_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resources.ReactionResource'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Gommunity_platform_reactions_interfaces_rest_resources.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get current user's reaction on a post
+      tags:
+      - reactions
+  /api/v1/subscriptions:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a user's subscription from a community. Users can unsubscribe
+        themselves, or owner/admin can remove users.
+      parameters:
+      - description: Unsubscribe request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/resources.UnsubscribeUserResource'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Unsubscribe a user from a community
+      tags:
+      - subscriptions
+    post:
+      consumes:
+      - application/json
+      description: 'Subscribe a user to a community with a specific role. IMPORTANT:
+        Self-subscriptions (following a community) always receive ''member'' role
+        regardless of requested role. In public communities, users can only subscribe
+        themselves. In private communities, owner/admin can add users by username
+        and assign any role.'
+      parameters:
+      - description: Subscription request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/resources.SubscribeUserResource'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/resources.SubscriptionResource'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Subscribe a user to a community
+      tags:
+      - subscriptions
+  /api/v1/subscriptions/communities/{community_id}:
+    get:
+      description: Get all subscriptions for a specific community with optional pagination
+      parameters:
+      - description: Community ID
+        in: path
+        name: community_id
+        required: true
+        type: string
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resources.SubscriptionListResource'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all subscriptions for a community
+      tags:
+      - subscriptions
+  /api/v1/subscriptions/communities/{community_id}/count:
+    get:
+      description: Get the total number of subscriptions for a specific community
+      parameters:
+      - description: Community ID
+        in: path
+        name: community_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resources.SubscriptionCountResource'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get subscription count for a community
+      tags:
+      - subscriptions
+  /api/v1/subscriptions/users/{user_id}/communities/{community_id}:
+    get:
+      description: Get a specific subscription for a user in a community
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      - description: Community ID
+        in: path
+        name: community_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resources.SubscriptionResource'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get subscription by user and community
+      tags:
+      - subscriptions
+  /api/v1/users/{id}:
     get:
       consumes:
       - application/json
@@ -86,25 +1257,25 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/resources.ErrorResponse'
+            $ref: '#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/resources.ErrorResponse'
+            $ref: '#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/resources.ErrorResponse'
+            $ref: '#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/resources.ErrorResponse'
+            $ref: '#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get user by ID
       tags:
       - users
-  /users/{id}/banner:
+  /api/v1/users/{id}/banner:
     put:
       consumes:
       - application/json
@@ -131,29 +1302,29 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/resources.ErrorResponse'
+            $ref: '#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/resources.ErrorResponse'
+            $ref: '#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/resources.ErrorResponse'
+            $ref: '#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/resources.ErrorResponse'
+            $ref: '#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/resources.ErrorResponse'
+            $ref: '#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update user banner URL
       tags:
       - users
-  /users/username/{username}:
+  /api/v1/users/username/{username}:
     get:
       consumes:
       - application/json
@@ -174,19 +1345,19 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/resources.ErrorResponse'
+            $ref: '#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/resources.ErrorResponse'
+            $ref: '#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/resources.ErrorResponse'
+            $ref: '#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/resources.ErrorResponse'
+            $ref: '#/definitions/Gommunity_platform_users_interfaces_rest_resources.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get user by username
@@ -194,7 +1365,7 @@ paths:
       - users
 securityDefinitions:
   BearerAuth:
-    description: Type "Bearer" followed by a space and JWT token.
+    description: Enter your JWT token directly (Bearer prefix is optional).
     in: header
     name: Authorization
     type: apiKey

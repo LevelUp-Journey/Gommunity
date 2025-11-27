@@ -14,12 +14,13 @@ type JWTMiddleware struct {
 	secretKey []byte
 }
 
-// Claims represents the JWT claims structure
+// Claims represents the JWT claims structure from IAM service
 type Claims struct {
-	UserID    string `json:"userId"`
-	Email     string `json:"email"`
-	Role      string `json:"role"`
-	ProfileID string `json:"profileId"`
+	UserID    string   `json:"userId"`
+	Email     string   `json:"email"`
+	Username  string   `json:"username"`
+	Roles     []string `json:"roles"` // Array of roles from IAM: ["STUDENT", "TEACHER", "ADMIN"]
+	ProfileID string   `json:"profileId"`
 	jwt.RegisteredClaims
 }
 
@@ -39,15 +40,11 @@ func (jm *JWTMiddleware) AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Extract token from "Bearer <token>"
-		parts := strings.SplitN(authHeader, " ", 2)
-		if len(parts) != 2 || parts[0] != "Bearer" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization format. Expected 'Bearer <token>'"})
-			c.Abort()
-			return
+		// Extract token - support both "Bearer <token>" and direct token
+		tokenString := authHeader
+		if strings.HasPrefix(authHeader, "Bearer ") {
+			tokenString = strings.TrimPrefix(authHeader, "Bearer ")
 		}
-
-		tokenString := parts[1]
 
 		// Parse and validate token
 		claims, err := jm.ValidateToken(tokenString)
@@ -61,10 +58,25 @@ func (jm *JWTMiddleware) AuthMiddleware() gin.HandlerFunc {
 		// Set claims in context for use in handlers
 		c.Set("userID", claims.UserID)
 		c.Set("email", claims.Email)
-		c.Set("role", claims.Role)
+		c.Set("username", claims.Username)
 		c.Set("profileID", claims.ProfileID)
 
-		log.Printf("Authenticated user: %s (UserID: %s)", claims.Email, claims.UserID)
+		// Get primary role from JWT roles array
+		// IAM sends roles as ["STUDENT"], ["TEACHER"], or ["ADMIN"]
+		// These roles come from the IAM service and are NOT stored in our database
+		var role string
+		if len(claims.Roles) > 0 {
+			// Use first role and add ROLE_ prefix if not present
+			role = claims.Roles[0]
+			if !strings.HasPrefix(role, "ROLE_") {
+				role = "ROLE_" + role
+			}
+		}
+
+		c.Set("role", role)
+		c.Set("roles", claims.Roles) // Store all roles for advanced authorization
+
+		log.Printf("Authenticated user: %s (UserID: %s, Role: '%s', AllRoles: %v)", claims.Email, claims.UserID, role, claims.Roles)
 		c.Next()
 	}
 }
@@ -118,4 +130,48 @@ func GetProfileIDFromContext(c *gin.Context) (string, error) {
 	}
 
 	return profileIDStr, nil
+}
+
+// GetRoleFromContext extracts role from gin context
+func GetRoleFromContext(c *gin.Context) (string, error) {
+	role, exists := c.Get("role")
+	if !exists {
+		return "", errors.New("role not found in context")
+	}
+
+	roleStr, ok := role.(string)
+	if !ok {
+		return "", errors.New("role is not a string")
+	}
+
+	return roleStr, nil
+}
+
+// RequireRole creates middleware that checks if user has required role
+func (jm *JWTMiddleware) RequireRole(requiredRoles ...string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		role, err := GetRoleFromContext(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Role not found in token"})
+			c.Abort()
+			return
+		}
+
+		// Check if user has any of the required roles
+		hasRole := false
+		for _, required := range requiredRoles {
+			if role == required {
+				hasRole = true
+				break
+			}
+		}
+
+		if !hasRole {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Insufficient permissions"})
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
 }
