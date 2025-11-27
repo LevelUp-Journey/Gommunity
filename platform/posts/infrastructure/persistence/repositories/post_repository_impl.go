@@ -31,7 +31,6 @@ type postDocument struct {
 	PostID      string   `bson:"post_id"`
 	CommunityID string   `bson:"community_id"`
 	AuthorID    string   `bson:"author_id"`
-	PostType    string   `bson:"post_type"`
 	Content     string   `bson:"content"`
 	Images      []string `bson:"images"`
 	CreatedAt   int64    `bson:"created_at"`
@@ -104,8 +103,8 @@ func (r *postRepositoryImpl) FindByCommunity(ctx context.Context, communityID va
 	return posts, nil
 }
 
-// FindByCommunities retrieves posts from multiple communities, optionally filtered by post type
-func (r *postRepositoryImpl) FindByCommunities(ctx context.Context, communityIDs []valueobjects.CommunityID, postType *valueobjects.PostType, limit, offset *int) ([]*entities.Post, error) {
+// FindByCommunities retrieves posts from multiple communities
+func (r *postRepositoryImpl) FindByCommunities(ctx context.Context, communityIDs []valueobjects.CommunityID, limit, offset *int) ([]*entities.Post, error) {
 	// Convert community IDs to strings
 	communityIDStrings := make([]string, len(communityIDs))
 	for i, id := range communityIDs {
@@ -114,11 +113,6 @@ func (r *postRepositoryImpl) FindByCommunities(ctx context.Context, communityIDs
 
 	// Build filter
 	filter := bson.M{"community_id": bson.M{"$in": communityIDStrings}}
-
-	// Add post type filter if provided
-	if postType != nil {
-		filter["post_type"] = postType.Value()
-	}
 
 	findOptions := options.Find().SetSort(bson.D{{Key: "created_at", Value: -1}})
 	if limit != nil {
@@ -218,7 +212,6 @@ func (r *postRepositoryImpl) entityToDocument(post *entities.Post) *postDocument
 		PostID:      post.PostID().Value(),
 		CommunityID: post.CommunityID().Value(),
 		AuthorID:    post.AuthorID().Value(),
-		PostType:    post.PostType().Value(),
 		Content:     post.Content().Value(),
 		Images:      post.Images().URLs(),
 		CreatedAt:   post.CreatedAt().Unix(),
@@ -239,10 +232,6 @@ func (r *postRepositoryImpl) documentToEntity(doc *postDocument) (*entities.Post
 	if err != nil {
 		return nil, err
 	}
-	postType, err := valueobjects.NewPostType(doc.PostType)
-	if err != nil {
-		return nil, err
-	}
 	content, err := valueobjects.NewPostContent(doc.Content)
 	if err != nil {
 		return nil, err
@@ -257,7 +246,6 @@ func (r *postRepositoryImpl) documentToEntity(doc *postDocument) (*entities.Post
 		postID,
 		communityID,
 		authorID,
-		postType,
 		content,
 		images,
 		time.Unix(doc.CreatedAt, 0),

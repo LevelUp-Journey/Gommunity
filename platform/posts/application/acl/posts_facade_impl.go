@@ -43,7 +43,9 @@ func (f *postsFacadeImpl) PostExists(ctx context.Context, postID string) (bool, 
 	return post != nil, nil
 }
 
-// GetAnnouncementsByCommunities retrieves announcements from multiple communities
+// GetAnnouncementsByCommunities retrieves posts from multiple communities.
+// Note: Announcements have been removed - all posts are messages now.
+// This method returns all posts for backward compatibility with Feed BC.
 func (f *postsFacadeImpl) GetAnnouncementsByCommunities(ctx context.Context, communityIDs []string, limit, offset *int) ([]*acl.PostData, error) {
 	// Convert string IDs to value objects
 	communityIDVOs := make([]valueobjects.CommunityID, 0, len(communityIDs))
@@ -59,11 +61,8 @@ func (f *postsFacadeImpl) GetAnnouncementsByCommunities(ctx context.Context, com
 		return []*acl.PostData{}, nil
 	}
 
-	// Create announcement post type filter
-	announcementType, _ := valueobjects.NewPostType(valueobjects.AnnouncementPostType)
-
-	// Get posts from repository
-	posts, err := f.postRepo.FindByCommunities(ctx, communityIDVOs, &announcementType, limit, offset)
+	// Get all posts from repository (no type filtering)
+	posts, err := f.postRepo.FindByCommunities(ctx, communityIDVOs, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +75,7 @@ func (f *postsFacadeImpl) GetAnnouncementsByCommunities(ctx context.Context, com
 			CommunityID: post.CommunityID().Value(),
 			AuthorID:    post.AuthorID().Value(),
 			Content:     post.Content().Value(),
-			MessageType: post.PostType().Value(),
+			MessageType: "message", // All posts are messages now
 			CreatedAt:   post.CreatedAt(),
 			UpdatedAt:   post.UpdatedAt(),
 		}

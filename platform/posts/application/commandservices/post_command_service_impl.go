@@ -35,8 +35,10 @@ func NewPostCommandService(
 	}
 }
 
-// HandlePublish publishes a new post respecting community roles.
+// HandlePublish publishes a new post.
+// Only community owners and admins can publish posts.
 func (s *postCommandServiceImpl) HandlePublish(ctx context.Context, cmd commands.CreatePostCommand) (*valueobjects.PostID, error) {
+	// Validate community exists
 	exists, err := s.externalCommunitiesService.ValidateCommunityExists(ctx, cmd.CommunityID())
 	if err != nil {
 		return nil, fmt.Errorf("failed to validate community: %w", err)
@@ -45,6 +47,7 @@ func (s *postCommandServiceImpl) HandlePublish(ctx context.Context, cmd commands
 		return nil, errors.New("community not found")
 	}
 
+	// Validate user exists
 	userExists, err := s.externalUsersService.ValidateUserExists(ctx, cmd.AuthorID())
 	if err != nil {
 		return nil, fmt.Errorf("failed to validate author: %w", err)
@@ -53,18 +56,20 @@ func (s *postCommandServiceImpl) HandlePublish(ctx context.Context, cmd commands
 		return nil, errors.New("author not found")
 	}
 
+	// Check user's role in the community
 	role, err := s.externalSubscriptionsService.GetUserRole(ctx, cmd.AuthorID(), cmd.CommunityID())
 	if err != nil {
 		return nil, fmt.Errorf("failed to verify membership: %w", err)
 	}
 
+	// If no subscription found, check if user is the community owner
 	if role == nil {
 		isOwner, err := s.externalCommunitiesService.ValidateUserIsOwner(ctx, cmd.CommunityID(), cmd.AuthorID())
 		if err != nil {
 			return nil, fmt.Errorf("failed to verify ownership: %w", err)
 		}
 		if !isOwner {
-			return nil, errors.New("only community members can publish posts")
+			return nil, errors.New("only community owners and admins can publish posts")
 		}
 
 		ownerRole, roleErr := valueobjects.NewCommunityRole(valueobjects.CommunityRoleOwner)
@@ -74,19 +79,15 @@ func (s *postCommandServiceImpl) HandlePublish(ctx context.Context, cmd commands
 		role = &ownerRole
 	}
 
-	if cmd.PostType().IsAnnouncement() && !role.IsAdminOrOwner() {
-		return nil, errors.New("only community admins or owners can publish announcements")
+	// Only owners and admins can publish
+	if !role.IsAdminOrOwner() {
+		return nil, errors.New("only community owners and admins can publish posts")
 	}
 
-	if cmd.PostType().IsMessage() && !(role.IsMember() || role.IsAdminOrOwner()) {
-		return nil, errors.New("user is not allowed to publish messages in this community")
-	}
-
-	// Users can create multiple posts in the same community
+	// Create and save post
 	post, err := entities.NewPost(
 		cmd.CommunityID(),
 		cmd.AuthorID(),
-		cmd.PostType(),
 		cmd.Content(),
 		cmd.Images(),
 	)
