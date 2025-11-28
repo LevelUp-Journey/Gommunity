@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"Gommunity/docs"
-	community_acl "Gommunity/platform/community/application/outboundservices/acl"
 	community_commandservices "Gommunity/platform/community/application/commandservices"
+	community_acl "Gommunity/platform/community/application/outboundservices/acl"
 	community_queryservices "Gommunity/platform/community/application/queryservices"
 	community_repositories "Gommunity/platform/community/infrastructure/persistence/repositories"
 	community_controllers "Gommunity/platform/community/interfaces/rest/controllers"
@@ -76,7 +76,7 @@ func main() {
 
 	// Set Swagger host dynamically but without hardcoding the hostname
 	// This will use the hostname from the request
-	docs.SwaggerInfo.Host = ""  // Empty = use current request host
+	docs.SwaggerInfo.Host = "" // Empty = use current request host
 
 	// Initialize MongoDB connection
 	mongoConn, err := mongodb.NewMongoConnection(mongodb.MongoConfig{
@@ -233,25 +233,37 @@ func main() {
 	// Initialize Kafka event consumer
 	kafkaEventConsumer := messaging.NewKafkaEventConsumer(registrationHandler, profileUpdateHandler)
 
-	// Initialize Kafka consumer
-	kafkaConsumer := kafka.NewKafkaConsumer(kafka.KafkaConfig{
-		BootstrapServers: cfg.Kafka.BootstrapServers,
-		GroupID:          "gommunity-consumer-group",
-		Topics: []string{
-			messaging.TopicCommunityRegistration,
-			messaging.TopicProfileUpdated,
-		},
-	})
-
-	// Start Kafka consumer in a goroutine
+	// Create context for Kafka consumer (if needed)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go func() {
-		if err := kafkaConsumer.ConsumeMessages(ctx, kafkaEventConsumer.HandleMessage); err != nil {
-			log.Printf("Kafka consumer error: %v", err)
-		}
-	}()
+	// Initialize Kafka consumer only if properly configured
+	if cfg.Kafka.BootstrapServers != "" && cfg.Kafka.BootstrapServers != "localhost:9092" {
+		log.Println("Initializing Kafka consumer...")
+
+		// Initialize Kafka consumer
+		kafkaConsumer := kafka.NewKafkaConsumer(kafka.KafkaConfig{
+			BootstrapServers: cfg.Kafka.BootstrapServers,
+			GroupID:          "gommunity-consumer-group",
+			Topics: []string{
+				messaging.TopicCommunityRegistration,
+				messaging.TopicProfileUpdated,
+			},
+			SecurityProtocol: cfg.Kafka.SecurityProtocol,
+			SASLMechanism:    cfg.Kafka.SASLMechanism,
+			SASLUsername:     cfg.Kafka.SASLUsername,
+			SASLPassword:     cfg.Kafka.SASLPassword,
+		})
+
+		// Start Kafka consumer in a goroutine
+		go func() {
+			if err := kafkaConsumer.ConsumeMessages(ctx, kafkaEventConsumer.HandleMessage); err != nil {
+				log.Printf("Kafka consumer error: %v", err)
+			}
+		}()
+	} else {
+		log.Println("Kafka is not configured or using default localhost - skipping Kafka consumer initialization")
+	}
 
 	// Initialize Gin router
 	r := gin.Default()
