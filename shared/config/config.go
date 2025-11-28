@@ -14,6 +14,10 @@ type KafkaConfig struct {
 	BootstrapServers string
 	GroupID          string
 	Topics           []string
+	SecurityProtocol string
+	SASLMechanism    string
+	SASLUsername     string
+	SASLPassword     string
 }
 
 type Config struct {
@@ -50,6 +54,10 @@ func Load() (*Config, error) {
 			BootstrapServers: getEnv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"),
 			GroupID:          getEnv("KAFKA_GROUP_ID", "gommunity-group"),
 			Topics:           getEnvSlice("KAFKA_TOPICS", []string{}),
+			SecurityProtocol: getEnv("KAFKA_SECURITY_PROTOCOL", "PLAINTEXT"),
+			SASLMechanism:    getEnv("KAFKA_SASL_MECHANISM", "PLAIN"),
+			SASLUsername:     getEnv("KAFKA_SASL_USERNAME", "$ConnectionString"),
+			SASLPassword:     getEnv("KAFKA_SASL_PASSWORD", ""),
 		},
 		JWTSecret:            getEnv("JWT_SECRET", ""),
 		ServiceDiscoveryURL:  strings.TrimSuffix(getEnv("SERVICE_DISCOVERY_URL", "http://127.0.0.1:8761/eureka"), "/"),
