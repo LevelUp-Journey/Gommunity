@@ -56,3 +56,17 @@ func (s *subscriptionQueryServiceImpl) HandleAll(ctx context.Context, query quer
 
 	return subscriptions, nil
 }
+
+// HandleGetCommunitiesByUser processes a GetCommunitiesByUserQuery to retrieve all communities a user is subscribed to
+func (s *subscriptionQueryServiceImpl) HandleGetCommunitiesByUser(ctx context.Context, query queries.GetCommunitiesByUserQuery) ([]*entities.Subscription, error) {
+	subscriptions, err := s.subscriptionRepo.FindAllByUserID(ctx, query.UserID())
+	if err != nil {
+		return nil, fmt.Errorf("failed to find user subscriptions: %w", err)
+	}
+
+	if subscriptions == nil {
+		return []*entities.Subscription{}, nil
+	}
+
+	return subscriptions, nil
+}

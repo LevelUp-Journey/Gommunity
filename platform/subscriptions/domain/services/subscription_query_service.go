@@ -17,4 +17,7 @@ type SubscriptionQueryService interface {
 
 	// HandleAll processes a GetAllSubscriptionsByCommunityQuery to retrieve all subscriptions for a community
 	HandleAll(ctx context.Context, query queries.GetAllSubscriptionsByCommunityQuery) ([]*entities.Subscription, error)
+
+	// HandleGetCommunitiesByUser processes a GetCommunitiesByUserQuery to retrieve all communities a user is subscribed to
+	HandleGetCommunitiesByUser(ctx context.Context, query queries.GetCommunitiesByUserQuery) ([]*entities.Subscription, error)
 }

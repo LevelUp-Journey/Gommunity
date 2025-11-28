@@ -329,8 +329,8 @@ func (c *SubscriptionController) GetAllSubscriptionsByCommunity(ctx *gin.Context
 // @Description Get a specific subscription for a user in a community
 // @Tags subscriptions
 // @Produce json
-// @Param user_id path int true "User ID"
-// @Param community_id path string true "Community ID"
+// @Param user_id path string true "User ID (UUID)"
+// @Param community_id path string true "Community ID (UUID)"
 // @Success 200 {object} resources.SubscriptionResource
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
@@ -379,6 +379,60 @@ func (c *SubscriptionController) GetSubscriptionByUserAndCommunity(ctx *gin.Cont
 		Role:           subscription.Role().Value(),
 		CreatedAt:      subscription.CreatedAt(),
 		UpdatedAt:      subscription.UpdatedAt(),
+	}
+
+	ctx.JSON(http.StatusOK, response)
+}
+
+// @Summary Get all communities a user is subscribed to
+// @Description Get all communities that a specific user is subscribed to
+// @Tags subscriptions
+// @Produce json
+// @Param user_id path string true "User ID (UUID)"
+// @Success 200 {object} resources.SubscriptionListResource
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security BearerAuth
+// @Router /api/v1/subscriptions/users/{user_id}/communities [get]
+func (c *SubscriptionController) GetCommunitiesByUser(ctx *gin.Context) {
+	userIDStr := ctx.Param("user_id")
+
+	userID, err := valueobjects.NewUserID(userIDStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	// Create query
+	query, err := queries.NewGetCommunitiesByUserQuery(userID)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Execute query
+	subscriptions, err := c.queryService.HandleGetCommunitiesByUser(ctx.Request.Context(), query)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Transform to resources
+	subscriptionResources := make([]resources.SubscriptionResource, 0, len(subscriptions))
+	for _, sub := range subscriptions {
+		subscriptionResources = append(subscriptionResources, resources.SubscriptionResource{
+			SubscriptionID: sub.SubscriptionID().Value(),
+			UserID:         sub.UserID().Value(),
+			CommunityID:    sub.CommunityID().Value(),
+			Role:           sub.Role().Value(),
+			CreatedAt:      sub.CreatedAt(),
+			UpdatedAt:      sub.UpdatedAt(),
+		})
+	}
+
+	response := resources.SubscriptionListResource{
+		Subscriptions: subscriptionResources,
+		Total:         len(subscriptionResources),
 	}
 
 	ctx.JSON(http.StatusOK, response)

@@ -1192,16 +1192,49 @@ paths:
       summary: Get subscription count for a community
       tags:
       - subscriptions
+  /api/v1/subscriptions/users/{user_id}/communities:
+    get:
+      description: Get all communities that a specific user is subscribed to
+      parameters:
+      - description: User ID (UUID)
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resources.SubscriptionListResource'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all communities a user is subscribed to
+      tags:
+      - subscriptions
   /api/v1/subscriptions/users/{user_id}/communities/{community_id}:
     get:
       description: Get a specific subscription for a user in a community
       parameters:
-      - description: User ID
+      - description: User ID (UUID)
         in: path
         name: user_id
         required: true
-        type: integer
-      - description: Community ID
+        type: string
+      - description: Community ID (UUID)
         in: path
         name: community_id
         required: true

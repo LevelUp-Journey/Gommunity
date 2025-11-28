@@ -318,6 +318,7 @@ func main() {
 		subscriptionRoutes.DELETE("", subscriptionController.UnsubscribeUser)
 		subscriptionRoutes.GET("/communities/:community_id/count", subscriptionController.GetSubscriptionCount)
 		subscriptionRoutes.GET("/communities/:community_id", subscriptionController.GetAllSubscriptionsByCommunity)
+		subscriptionRoutes.GET("/users/:user_id/communities", subscriptionController.GetCommunitiesByUser)
 		subscriptionRoutes.GET("/users/:user_id/communities/:community_id", subscriptionController.GetSubscriptionByUserAndCommunity)
 	}
 

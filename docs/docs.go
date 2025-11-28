@@ -1302,6 +1302,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/subscriptions/users/{user_id}/communities": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all communities that a specific user is subscribed to",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "subscriptions"
+                ],
+                "summary": "Get all communities a user is subscribed to",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID (UUID)",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resources.SubscriptionListResource"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/subscriptions/users/{user_id}/communities/{community_id}": {
             "get": {
                 "security": [
@@ -1319,15 +1371,15 @@ const docTemplate = `{
                 "summary": "Get subscription by user and community",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "User ID",
+                        "type": "string",
+                        "description": "User ID (UUID)",
                         "name": "user_id",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "Community ID",
+                        "description": "Community ID (UUID)",
                         "name": "community_id",
                         "in": "path",
                         "required": true
